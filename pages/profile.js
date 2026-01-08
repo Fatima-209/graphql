@@ -1,6 +1,6 @@
 import { logout } from "../services/auth.js";
 import { renderLogin } from "./login.js";
-import { renderBasicInfo } from "../components/basicinfo.js";
+import { renderBasicInfo } from "../components/basicInfo.js";
 
 export async function renderProfile(app) {
   app.innerHTML = `
