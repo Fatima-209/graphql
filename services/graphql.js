@@ -22,6 +22,6 @@ export async function graphqlRequest(query, variables = {}) {
     throw new Error("GraphQL request failed");
   }
 
-  const result = await response.json();
-  return result.data;
+  const json = await response.json();
+  return json.data;
 }

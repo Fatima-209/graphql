@@ -13,7 +13,7 @@ export async function renderBasicInfo(container) {
   const data = await graphqlRequest(query);
   const user = data.user[0];
 
-  container.innerHTML += `
+  container.innerHTML = `
     <h3>Basic Info</h3>
     <p><strong>ID:</strong> ${user.id}</p>
     <p><strong>Username:</strong> ${user.login}</p>
