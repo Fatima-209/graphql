@@ -2,6 +2,7 @@ import { logout } from "../services/auth.js";
 import { renderLogin } from "./login.js";
 import { renderBasicInfo } from "../components/basicinfo.js";
 import { renderTotalXP } from "../components/totalXP.js";
+import { graphqlRequest } from "../services/graphql.js";
 
 export async function renderProfile(app) {
   app.innerHTML = `
@@ -22,7 +23,18 @@ export async function renderProfile(app) {
   const content = document.getElementById("profile-content");
   content.innerHTML = "";
 
-  await renderBasicInfo(content);
-await renderTotalXP(content, userId);
+  // Get user ID FIRST
+  const userQuery = `
+    {
+      user {
+        id
+      }
+    }
+  `;
+  const userData = await graphqlRequest(userQuery);
+  const userId = userData.user[0].id;
 
+  // 2️⃣ Render sections
+  await renderBasicInfo(content);
+  await renderTotalXP(content, userId);
 }
