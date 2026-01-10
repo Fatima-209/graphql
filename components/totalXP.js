@@ -26,8 +26,9 @@ export async function renderTotalXP(container, userId) {
   const data = await graphqlRequest(query, { userId });
 
   // calculations
-  const totalUp = data.xpUp.reduce((sum, x) => sum + x.amount, 0);
-  const totalDown = data.xpDown.reduce((sum, x) => sum + x.amount, 0);
+  const totalUp = (data.xpUp || []).reduce((s, x) => s + x.amount, 0);
+const totalDown = (data.xpDown || []).reduce((s, x) => s + x.amount, 0);
+
   const netXP = totalUp - totalDown;
 
   container.innerHTML += `
