@@ -15,7 +15,6 @@ export async function renderBasicInfo(container) {
 
   container.innerHTML = `
     <h3>Basic Info</h3>
-    <p>Welcome to your dashboard, ${user.login}</p>
     <p><strong>ID:</strong> ${user.id}</p>
     <p><strong>Username:</strong> ${user.login}</p>
   `;
