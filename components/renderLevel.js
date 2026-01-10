@@ -6,7 +6,7 @@ export async function renderLevel(container) {
   progress(
     where: { grade: { _is_null: false } }
     order_by: { grade: desc }
-    limit: 1
+    limit: 2
   ) {
     grade
     path
