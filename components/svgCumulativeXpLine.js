@@ -72,12 +72,18 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
     .map((p, i) => `${i === 0 ? "M" : "L"} ${scaleX(p.x)} ${scaleY(p.y)}`)
     .join(" ");
 
-  const svg = el("svg", {
-    viewBox: `0 0 ${width} ${height}`,
-    role: "img",
+const svg = el("svg", {
+  viewBox: "0 0 900 320",
+  width: "100%",
+  height: "100%",
+  preserveAspectRatio: "xMidYMid meet",
+  role: "img",
     "aria-label": "Cumulative XP line chart",
     class: "svg-chart",
-  });
+});
+
+    
+  
 
   // Background grid lines (Y)
   const gridLines = 4;

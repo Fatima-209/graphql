@@ -40,11 +40,15 @@ export function renderXpBySkillBarSvg(container, xpTx) {
   const innerH = height - padding.top - padding.bottom;
 
   const svg = el("svg", {
-    viewBox: `0 0 ${width} ${height}`,
-    role: "img",
+  viewBox: "0 0 900 320",
+  width: "100%",
+  height: "100%",
+  preserveAspectRatio: "xMidYMid meet",
+  role: "img",
     "aria-label": "XP by skill bar chart",
     class: "svg-chart",
-  });
+});
+    
 
   // Axes
   svg.appendChild(el("line", {
