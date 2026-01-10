@@ -23,6 +23,6 @@ export async function renderProfile(app) {
   content.innerHTML = "";
 
   await renderBasicInfo(content);
-  await renderTotalXP(content);
+await renderTotalXP(content, userId);
 
 }
