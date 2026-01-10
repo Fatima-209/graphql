@@ -17,12 +17,14 @@ export async function renderLevel(container) {
   `;
 
   const data = await graphqlRequest(query);
+const totalXP = await renderTotalXP(content, userId);
 
-  const current = data.progress[0];
-  const level = current?.grade ?? 0;
+const LEVEL_XP = 50_000;
+const level = Math.floor(totalXP / LEVEL_XP);
 
-  container.innerHTML += `
-    <h3>Current Level</h3>
-    <p><strong>Level ${level}</strong></p>
-  `;
+container.innerHTML += `
+  <h3>Current Level</h3>
+  <p><strong>Level ${level}</strong></p>
+`;
+
 }

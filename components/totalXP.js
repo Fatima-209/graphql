@@ -27,14 +27,15 @@ export async function renderTotalXP(container, userId) {
 
   // calculations
   const totalUp = (data.xpUp || []).reduce((s, x) => s + x.amount, 0);
-const totalDown = (data.xpDown || []).reduce((s, x) => s + x.amount, 0);
-
+  const totalDown = (data.xpDown || []).reduce((s, x) => s + x.amount, 0);
   const netXP = totalUp - totalDown;
-
+  const totalXP = totalUp;
   container.innerHTML += `
     <h3>XP Summary</h3>
     <p><strong>All XP:</strong> ${totalUp.toLocaleString()}</p>
     <p><strong>XP Down:</strong> ${totalDown.toLocaleString()}</p>
     <p><strong>Net XP:</strong> ${netXP.toLocaleString()}</p>
   `;
+    return totalXP;
+
 }
