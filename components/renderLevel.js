@@ -20,8 +20,11 @@ export async function renderLevel(container) {
   const level = Math.round(raw * 10);
 
   container.innerHTML += `
-    <h3>Current Level</h3>
-    <p><strong>Level ${level}</strong></p>
-  `;
+  <div class="stat-item">
+    <label>Level</label>
+    <span>${level}</span>
+  </div>
+`;
+
 }
 

@@ -31,11 +31,22 @@ export async function renderTotalXP(container, userId) {
   const netXP = totalUp - totalDown;
   const totalXP = totalUp;
   container.innerHTML += `
-    <h3>XP Summary</h3>
-    <p><strong>All XP:</strong> ${totalUp.toLocaleString()}</p>
-    <p><strong>XP Down:</strong> ${totalDown.toLocaleString()}</p>
-    <p><strong>Net XP:</strong> ${netXP.toLocaleString()}</p>
-  `;
+  <div class="stat-item">
+    <label>Total XP</label>
+    <span>${totalUp.toLocaleString()}</span>
+  </div>
+
+  <div class="stat-item">
+    <label>XP Down</label>
+    <span>${totalDown.toLocaleString()}</span>
+  </div>
+
+  <div class="stat-item">
+    <label>Net XP</label>
+    <span>${netXP.toLocaleString()}</span>
+  </div>
+`;
+
     return totalXP;
 
 }

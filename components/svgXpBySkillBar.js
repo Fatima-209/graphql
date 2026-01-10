@@ -10,12 +10,22 @@ function niceNumber(x) {
 }
 
 function categorize(path = "") {
-    const p = path.toLowerCase();
-    if (p.includes("go")) return "Go";
-    if (p.includes("js") || p.includes("javascript")) return "JavaScript";
-    if (p.includes("shell") || p.includes("bash")) return "Shell";
-    return "Other";
+  const p = path.toLowerCase();
+
+  if (p.includes("piscine-go") || p.includes("/go")) return "Go";
+  if (
+    p.includes("javascript") ||
+    p.includes("js") ||
+    p.includes("real-time") ||
+    p.includes("make-your-game") ||
+    p.includes("forum")
+  ) return "JavaScript";
+
+  if (p.includes("shell") || p.includes("bash")) return "Shell";
+
+  return "Other";
 }
+
 
 export function renderXpBySkillBarSvg(container, xpTx) {
     container.innerHTML = `
