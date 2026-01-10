@@ -134,6 +134,18 @@ const svg = el("svg", {
     "stroke-linejoin": "round",
     "stroke-linecap": "round",
   }));
+const length = path.getTotalLength();
+path.style.strokeDasharray = length;
+path.style.strokeDashoffset = length;
+
+path.animate(
+  [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
+  {
+    duration: 1200,
+    easing: "ease-out",
+    fill: "forwards",
+  }
+);
 
   // Optional: last point marker
   const last = points[points.length - 1];
