@@ -4,8 +4,8 @@ export async function renderBasicInfo(container) {
   const query = `
     {
       user {
-        id
         login
+        id
       }
     }
   `;
