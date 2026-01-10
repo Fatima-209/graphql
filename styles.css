@@ -33,3 +33,29 @@ button {
 .hidden {
   display: none;
 }
+.stats { margin-top: 24px; }
+.muted { opacity: 0.75; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.svg-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-top: 10px;
+}

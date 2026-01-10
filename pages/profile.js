@@ -4,6 +4,7 @@ import { renderTotalXP } from "../components/totalXP.js";
 import { graphqlRequest } from "../services/graphql.js";
 import { renderBasicInfo } from "../components/basicinfo.js";
 import { renderLevel } from "../components/renderLevel.js";
+import { renderStatsSection } from "../components/statsSection.js";
 export async function renderProfile(app) {
   app.innerHTML = `
     <section class="page">
@@ -41,6 +42,7 @@ try {
   await renderBasicInfo(content);
   await renderTotalXP(content, userId);
   await renderLevel(content);
+  await renderStatsSection(content, userId);
 
 } catch (err) {
   console.error(err);
