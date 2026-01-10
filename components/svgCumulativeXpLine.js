@@ -6,21 +6,19 @@ function el(tag, attrs = {}, children = []) {
 }
 
 function fmtDate(d) {
-  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  return d.toISOString().slice(0, 10);
 }
 
 function niceNumber(x) {
   return x.toLocaleString();
 }
 
-// Optional: bucket per day to reduce points (makes line cleaner)
 function groupByDay(transactions) {
   const map = new Map();
   for (const tx of transactions) {
     const day = fmtDate(new Date(tx.createdAt));
     map.set(day, (map.get(day) || 0) + tx.amount);
   }
-  // sort by date
   return [...map.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([day, amount]) => ({ day, amount }));
@@ -29,170 +27,129 @@ function groupByDay(transactions) {
 export function renderCumulativeXpLineSvg(container, xpTx) {
   container.innerHTML = `
     <h3>Skills Progression (Cumulative XP Over Time)</h3>
-    <p class="muted">Running total of all XP earned across time.</p>
+    <p class="muted">XP growth over time based on validated completions.</p>
   `;
 
-  const width = 900;
-  const height = 320;
-  const padding = { top: 20, right: 18, bottom: 36, left: 56 };
+  const width = 1400;
+  const height = 420;
+  const padding = { top: 40, right: 40, bottom: 60, left: 90 };
 
-  // 1) Bucket per day, then convert to cumulative points
   const daily = groupByDay(xpTx);
   let cumulative = 0;
 
-  const points = daily.map((d) => {
+  const points = daily.map(d => {
     cumulative += d.amount;
     return {
       x: new Date(d.day).getTime(),
       y: cumulative,
-      label: d.day,
     };
   });
 
-  if (points.length === 0) {
+  if (!points.length) {
     container.innerHTML += `<p class="muted">No XP data found.</p>`;
     return;
   }
 
   const minX = points[0].x;
   const maxX = points[points.length - 1].x;
-  const maxY = Math.max(...points.map((p) => p.y));
+
+  const rawMaxY = Math.max(...points.map(p => p.y));
+  const step = Math.pow(10, Math.floor(Math.log10(rawMaxY)));
+  const maxY = Math.ceil(rawMaxY / step) * step;
 
   const innerW = width - padding.left - padding.right;
   const innerH = height - padding.top - padding.bottom;
 
-  const scaleX = (x) =>
+  const scaleX = x =>
     padding.left + ((x - minX) / (maxX - minX || 1)) * innerW;
 
-  const scaleY = (y) =>
-    padding.top + (1 - y / (maxY || 1)) * innerH;
+  const scaleY = y =>
+    padding.top + (1 - y / maxY) * innerH;
 
-  // 2) Build SVG path
   const d = points
     .map((p, i) => `${i === 0 ? "M" : "L"} ${scaleX(p.x)} ${scaleY(p.y)}`)
     .join(" ");
 
-const svg = el("svg", {
-  viewBox: "0 0 900 320",
-  width: "100%",
-  height: "100%",
-  preserveAspectRatio: "xMidYMid meet",
-  role: "img",
-    "aria-label": "Cumulative XP line chart",
+  const svg = el("svg", {
+    viewBox: `0 0 ${width} ${height}`,
+    width: "100%",
+    height: height,
     class: "svg-chart",
-});
+  });
 
-    
-  
-
-  // Background grid lines (Y)
-  const gridLines = 4;
+  /* Y grid + labels */
+  const gridLines = 5;
   for (let i = 0; i <= gridLines; i++) {
     const yVal = (maxY / gridLines) * i;
     const y = scaleY(yVal);
-    svg.appendChild(
-      el("line", {
-        x1: padding.left,
-        y1: y,
-        x2: width - padding.right,
-        y2: y,
-        stroke: "rgba(255,255,255,0.07)",
-      })
-    );
 
-    // Y-axis labels
-    svg.appendChild(
-      el("text", {
-        x: padding.left - 10,
-        y: y + 4,
-        fill: "rgba(255,255,255,0.65)",
-        "text-anchor": "end",
-        "font-size": "12",
-      }, [document.createTextNode(niceNumber(Math.round(yVal)))])
-    );
+    svg.appendChild(el("line", {
+      x1: padding.left,
+      y1: y,
+      x2: width - padding.right,
+      y2: y,
+      stroke: "rgba(255,255,255,0.07)",
+    }));
+
+    svg.appendChild(el("text", {
+      x: padding.left - 12,
+      y: y + 4,
+      fill: "rgba(255,255,255,0.7)",
+      "text-anchor": "end",
+      "font-size": "13",
+    }, [document.createTextNode(niceNumber(Math.round(yVal)))]));
   }
 
-  // Axes
-  svg.appendChild(el("line", {
-    x1: padding.left, y1: padding.top,
-    x2: padding.left, y2: height - padding.bottom,
-    stroke: "rgba(255,255,255,0.15)",
-  }));
+  /* X ticks */
+  const tickCount = 6;
+  for (let i = 0; i <= tickCount; i++) {
+    const t = minX + (i / tickCount) * (maxX - minX);
+    const x = scaleX(t);
 
-  svg.appendChild(el("line", {
-    x1: padding.left, y1: height - padding.bottom,
-    x2: width - padding.right, y2: height - padding.bottom,
-    stroke: "rgba(255,255,255,0.15)",
-  }));
-
-  // Line path
-const path = el("path", {
-  d,
-  fill: "none",
-  stroke: "rgba(155,92,255,0.95)",
-  "stroke-width": "3",
-  "stroke-linejoin": "round",
-  "stroke-linecap": "round",
-});
-
-svg.appendChild(path);
-
-// Animate safely
-const length = path.getTotalLength();
-path.style.strokeDasharray = length;
-path.style.strokeDashoffset = length;
-
-path.animate(
-  [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
-  {
-    duration: 1200,
-    easing: "ease-out",
-    fill: "forwards",
+    svg.appendChild(el("text", {
+      x,
+      y: height - 14,
+      fill: "rgba(255,255,255,0.65)",
+      "text-anchor": "middle",
+      "font-size": "12",
+    }, [document.createTextNode(fmtDate(new Date(t)))]));
   }
-);
 
-
-  // Optional: last point marker
-  const last = points[points.length - 1];
-  svg.appendChild(el("circle", {
-    cx: scaleX(last.x),
-    cy: scaleY(last.y),
-    r: 4,
-    fill: "rgba(155,92,255,1)",
+  /* Axes */
+  svg.appendChild(el("line", {
+    x1: padding.left,
+    y1: padding.top,
+    x2: padding.left,
+    y2: height - padding.bottom,
+    stroke: "rgba(255,255,255,0.2)",
   }));
 
-  // X labels (start & end)
-  const startLabel = new Date(minX).toISOString().slice(0, 10);
-  const endLabel = new Date(maxX).toISOString().slice(0, 10);
+  svg.appendChild(el("line", {
+    x1: padding.left,
+    y1: height - padding.bottom,
+    x2: width - padding.right,
+    y2: height - padding.bottom,
+    stroke: "rgba(255,255,255,0.2)",
+  }));
 
-  svg.appendChild(el("text", {
-    x: padding.left,
-    y: height - 12,
-    fill: "rgba(255,255,255,0.65)",
-    "text-anchor": "start",
-    "font-size": "12",
-  }, [document.createTextNode(startLabel)]));
+  /* Path */
+  const path = el("path", {
+    d,
+    fill: "none",
+    stroke: "rgba(155,92,255,0.95)",
+    "stroke-width": "3",
+    "stroke-linecap": "round",
+  });
 
-  svg.appendChild(el("text", {
-    x: width - padding.right,
-    y: height - 12,
-    fill: "rgba(255,255,255,0.65)",
-    "text-anchor": "end",
-    "font-size": "12",
-  }, [document.createTextNode(endLabel)]));
+  svg.appendChild(path);
 
-  // Title inside (optional)
-  svg.appendChild(el("text", {
-    x: padding.left,
-    y: 14,
-    fill: "rgba(255,255,255,0.75)",
-    "font-size": "12",
-  }, [document.createTextNode("All XP")]))
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = len;
+  path.style.strokeDashoffset = len;
+  path.animate(
+    [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
+    { duration: 1200, easing: "ease-out", fill: "forwards" }
+  );
 
   container.appendChild(svg);
-
-  // Small summary
-  container.innerHTML += `
-    <p class="muted"><strong>Total XP:</strong> ${niceNumber(last.y)}</p>
-  `;
 }

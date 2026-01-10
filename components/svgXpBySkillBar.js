@@ -1,151 +1,114 @@
 function el(tag, attrs = {}, children = []) {
-    const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
-    for (const c of children) n.appendChild(c);
-    return n;
+  const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
+  for (const c of children) n.appendChild(c);
+  return n;
 }
 
 function niceNumber(x) {
-    return x.toLocaleString();
+  return x.toLocaleString();
 }
 
-function categorize(path = "") {
-  const p = path.toLowerCase();
-
-  if (p.includes("piscine-go") || p.includes("/go")) return "Go";
-  if (
-    p.includes("javascript") ||
+function getSkillFromPath(path = "") {
+  const parts = path.toLowerCase().split("/").filter(Boolean);
+  return parts.find(p =>
+    p.includes("go") ||
     p.includes("js") ||
-    p.includes("real-time") ||
-    p.includes("make-your-game") ||
-    p.includes("forum")
-  ) return "JavaScript";
-
-  if (p.includes("shell") || p.includes("bash")) return "Shell";
-
-  return "Other";
+    p.includes("javascript") ||
+    p.includes("shell")
+  ) || "other";
 }
-
 
 export function renderXpBySkillBarSvg(container, xpTx) {
-    container.innerHTML = `
-    <h3>XP By Skill</h3>
-    <p class="muted">How your XP is distributed across different skills.</p>
+  container.innerHTML = `
+    <h3>XP Distribution by Skill</h3>
+    <p class="muted">XP grouped dynamically based on your learning paths.</p>
   `;
 
-    // 1) Sum XP by category
-    const totals = { JavaScript: 0, Go: 0, Shell: 0, Other: 0 };
-    for (const tx of xpTx) {
-        const key = categorize(tx.path);
-        totals[key] += tx.amount;
-    }
+  const totals = {};
+  for (const tx of xpTx) {
+    const skill = getSkillFromPath(tx.path);
+    totals[skill] = (totals[skill] || 0) + tx.amount;
+  }
 
-    const data = Object.entries(totals).map(([label, value]) => ({ label, value }));
-    const max = Math.max(...data.map((d) => d.value), 1);
+  const data = Object.entries(totals).map(([label, value]) => ({
+    label,
+    value,
+  }));
 
-    const width = 900;
-    const height = 280;
-    const padding = { top: 20, right: 18, bottom: 46, left: 56 };
-    const innerW = width - padding.left - padding.right;
-    const innerH = height - padding.top - padding.bottom;
+  const max = Math.max(...data.map(d => d.value), 1);
 
-    const svg = el("svg", {
-        viewBox: "0 0 900 320",
-        width: "100%",
-        height: "100%",
-        preserveAspectRatio: "xMidYMid meet",
-        role: "img",
-        "aria-label": "XP by skill bar chart",
-        class: "svg-chart",
+  const width = 1400;
+  const height = 360;
+  const padding = { top: 40, right: 40, bottom: 70, left: 90 };
+
+  const innerW = width - padding.left - padding.right;
+  const innerH = height - padding.top - padding.bottom;
+
+  const svg = el("svg", {
+    viewBox: `0 0 ${width} ${height}`,
+    width: "100%",
+    height: height,
+    class: "svg-chart",
+  });
+
+  /* Axes */
+  svg.appendChild(el("line", {
+    x1: padding.left,
+    y1: padding.top,
+    x2: padding.left,
+    y2: height - padding.bottom,
+    stroke: "rgba(255,255,255,0.2)",
+  }));
+
+  svg.appendChild(el("line", {
+    x1: padding.left,
+    y1: height - padding.bottom,
+    x2: width - padding.right,
+    y2: height - padding.bottom,
+    stroke: "rgba(255,255,255,0.2)",
+  }));
+
+  const barW = innerW / data.length * 0.7;
+  const gap = innerW / data.length * 0.3;
+
+  data.forEach((d, i) => {
+    const x = padding.left + i * (barW + gap);
+    const h = (d.value / max) * innerH;
+    const y = padding.top + innerH - h;
+
+    const rect = el("rect", {
+      x,
+      y,
+      width: barW,
+      height: h,
+      rx: 12,
+      fill: "rgba(155,92,255,0.85)",
     });
 
+    svg.appendChild(rect);
 
-    // Axes
-    svg.appendChild(el("line", {
-        x1: padding.left, y1: padding.top,
-        x2: padding.left, y2: height - padding.bottom,
-        stroke: "rgba(255,255,255,0.15)",
-    }));
+    rect.animate(
+      [{ height: 0, y: height - padding.bottom }, { height: h, y }],
+      { duration: 900, easing: "ease-out", fill: "forwards" }
+    );
 
-    svg.appendChild(el("line", {
-        x1: padding.left, y1: height - padding.bottom,
-        x2: width - padding.right, y2: height - padding.bottom,
-        stroke: "rgba(255,255,255,0.15)",
-    }));
+    svg.appendChild(el("text", {
+      x: x + barW / 2,
+      y: height - 20,
+      fill: "rgba(255,255,255,0.75)",
+      "text-anchor": "middle",
+      "font-size": "13",
+    }, [document.createTextNode(d.label)]));
 
-    // Y grid + labels
-    const gridLines = 4;
-    for (let i = 0; i <= gridLines; i++) {
-        const yVal = (max / gridLines) * i;
-        const y = padding.top + (1 - yVal / max) * innerH;
+    svg.appendChild(el("text", {
+      x: x + barW / 2,
+      y: y - 10,
+      fill: "rgba(255,255,255,0.7)",
+      "text-anchor": "middle",
+      "font-size": "13",
+    }, [document.createTextNode(niceNumber(d.value))]));
+  });
 
-        svg.appendChild(el("line", {
-            x1: padding.left,
-            y1: y,
-            x2: width - padding.right,
-            y2: y,
-            stroke: "rgba(255,255,255,0.07)",
-        }));
-
-        svg.appendChild(el("text", {
-            x: padding.left - 10,
-            y: y + 4,
-            fill: "rgba(255,255,255,0.65)",
-            "text-anchor": "end",
-            "font-size": "12",
-        }, [document.createTextNode(niceNumber(Math.round(yVal)))]));
-    }
-
-    // 2) Bars
-    const barCount = data.length;
-    const gap = 18;
-    const barW = (innerW - gap * (barCount - 1)) / barCount;
-
-    data.forEach((d, i) => {
-        const x = padding.left + i * (barW + gap);
-        const h = (d.value / max) * innerH;
-        const y = padding.top + (innerH - h);
-
-        // Bar
-        const rect = el("rect", {
-            x,
-            y,
-            width: barW,
-            height: h,
-            rx: 10,
-            fill: "rgba(155,92,255,0.85)",
-        });
-
-        svg.appendChild(rect);
-
-        rect.animate(
-            [{ height: 0, y: height - padding.bottom }, { height: h, y }],
-            {
-                duration: 800,
-                easing: "ease-out",
-                fill: "forwards",
-            }
-        );
-
-
-        // Label under bar
-        svg.appendChild(el("text", {
-            x: x + barW / 2,
-            y: height - 18,
-            fill: "rgba(255,255,255,0.75)",
-            "text-anchor": "middle",
-            "font-size": "12",
-        }, [document.createTextNode(d.label)]));
-
-        // Value above bar
-        svg.appendChild(el("text", {
-            x: x + barW / 2,
-            y: y - 8,
-            fill: "rgba(255,255,255,0.65)",
-            "text-anchor": "middle",
-            "font-size": "12",
-        }, [document.createTextNode(niceNumber(d.value))]));
-    });
-
-    container.appendChild(svg);
+  container.appendChild(svg);
 }
