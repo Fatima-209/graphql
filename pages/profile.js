@@ -20,23 +20,33 @@ export async function renderProfile(app) {
 
   const content = document.getElementById("profile-content");
   content.innerHTML = "";
-
-  try {
-    const userQuery = `
-      {
-        user {
-          id
-        }
+try {
+  const userQuery = `
+    {
+      user {
+        id
+        login
       }
-    `;
-    const userData = await graphqlRequest(userQuery);
-    const userId = userData.user[0].id;
+    }
+  `;
 
-    await renderBasicInfo(content);
-    await renderTotalXP(content, userId);
+  const userData = await graphqlRequest(userQuery);
 
-  } catch (err) {
-    console.error("PROFILE LOAD ERROR:", err);
-    content.innerHTML = `<p style="color:red">Failed to load profile</p>`;
+  if (!userData?.user?.length) {
+    throw new Error("No user data returned");
   }
+
+  const userId = userData.user[0].id;
+
+  await renderBasicInfo(content);
+  await renderTotalXP(content, userId);
+
+} catch (err) {
+  console.error(err);
+
+  // VERY IMPORTANT UX FALLBACK
+  logout();
+  renderLogin(app);
+}
+
 }
