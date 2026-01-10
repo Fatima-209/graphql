@@ -1,5 +1,5 @@
 import { graphqlRequest } from "../services/graphql.js";
-
+// changed file name
 export async function renderBasicInfo(container) {
   const query = `
     {
