@@ -97,14 +97,17 @@ export function renderXpBySkillBarSvg(container, xpTx) {
         const y = padding.top + (innerH - h);
 
         // Bar
-        svg.appendChild(el("rect", {
+        const rect = el("rect", {
             x,
             y,
             width: barW,
             height: h,
             rx: 10,
             fill: "rgba(155,92,255,0.85)",
-        }));
+        });
+
+        svg.appendChild(rect);
+
         rect.animate(
             [{ height: 0, y: height - padding.bottom }, { height: h, y }],
             {
@@ -113,6 +116,7 @@ export function renderXpBySkillBarSvg(container, xpTx) {
                 fill: "forwards",
             }
         );
+
 
         // Label under bar
         svg.appendChild(el("text", {

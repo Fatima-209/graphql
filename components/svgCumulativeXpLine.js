@@ -126,14 +126,18 @@ const svg = el("svg", {
   }));
 
   // Line path
-  svg.appendChild(el("path", {
-    d,
-    fill: "none",
-    stroke: "rgba(155,92,255,0.95)",
-    "stroke-width": "3",
-    "stroke-linejoin": "round",
-    "stroke-linecap": "round",
-  }));
+const path = el("path", {
+  d,
+  fill: "none",
+  stroke: "rgba(155,92,255,0.95)",
+  "stroke-width": "3",
+  "stroke-linejoin": "round",
+  "stroke-linecap": "round",
+});
+
+svg.appendChild(path);
+
+// Animate safely
 const length = path.getTotalLength();
 path.style.strokeDasharray = length;
 path.style.strokeDashoffset = length;
@@ -146,6 +150,7 @@ path.animate(
     fill: "forwards",
   }
 );
+
 
   // Optional: last point marker
   const last = points[points.length - 1];
