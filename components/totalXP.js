@@ -30,14 +30,22 @@ export async function renderTotalXP(container, userId) {
   const totalDown = (data.xpDown || []).reduce((s, x) => s + x.amount, 0);
   const netXP = totalUp - totalDown;
   const totalXP = totalUp;
-  container.innerHTML += `
-  <div class="stat-item">
-    <label>Total XP</label>
-    <span>${totalUp.toLocaleString()}</span>
-     <label>XP Down</label>
-    <span>${totalDown.toLocaleString()}</span>
-    <label>Net XP</label>
-    <span>${netXP.toLocaleString()}</span>
+container.innerHTML += `
+  <div class="hero-stats">
+    <div class="stat-item">
+      <label>Total XP</label>
+      <span>${totalUp.toLocaleString()}</span>
+    </div>
+
+    <div class="stat-item">
+      <label>XP Down</label>
+      <span>${totalDown.toLocaleString()}</span>
+    </div>
+
+    <div class="stat-item">
+      <label>Net XP</label>
+      <span>${netXP.toLocaleString()}</span>
+    </div>
   </div>
 `;
 

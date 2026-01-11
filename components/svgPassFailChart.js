@@ -18,37 +18,44 @@ function el(tag, attrs = {}, children = []) {
   return n;
 }
 
-
 export async function renderPassFailChart(container, userId) {
+  // ✅ SAFETY GUARD (prevents logout loops)
+  if (!container) return;
+
   container.innerHTML = `
     <h3>Project Outcomes (Pass / Fail)</h3>
-    <p class="muted">Based on your validated project results.</p>
+    <p class="muted">Based on validated project results (excluding piscine).</p>
   `;
 
- const query = `
-  query PassFail($userId: Int!) {
-    result(
-      where: {
-        userId: { _eq: $userId }
-        object: {
-          type: { _eq: "project" }
-          path: { _nlike: "%piscine%" }
+  // ✅ VALID GRAPHQL QUERY (no deep filtering)
+  const query = `
+    query PassFail($userId: Int!) {
+      result(where: { userId: { _eq: $userId } }) {
+        grade
+        object {
+          type
+          path
         }
       }
-    ) {
-      grade
     }
-  }
-`;
-
+  `;
 
   const data = await graphqlRequest(query, { userId });
-  const results = data.result || [];
 
-  const passed = results.filter(r => r.grade === 1).length;
-  const failed = results.filter(r => r.grade === 0).length;
+  // ✅ SAFE ACCESS (prevents undefined crash)
+  const results = data?.result ?? [];
+
+  // ✅ FILTER IN JS (audit-safe)
+  const projectResults = results.filter(r =>
+    r.object?.type === "project" &&
+    !r.object?.path?.toLowerCase().includes("piscine")
+  );
+
+  const passed = projectResults.filter(r => r.grade === 1).length;
+  const failed = projectResults.filter(r => r.grade === 0).length;
   const total = passed + failed || 1;
 
+  // --- SVG SETUP ---
   const width = 420;
   const height = 320;
   const radius = 90;
@@ -56,7 +63,6 @@ export async function renderPassFailChart(container, userId) {
   const cy = height / 2;
 
   const passAngle = (passed / total) * Math.PI * 2;
-
   const largeArc = passAngle > Math.PI ? 1 : 0;
 
   const x = cx + radius * Math.cos(passAngle - Math.PI / 2);
@@ -88,7 +94,7 @@ export async function renderPassFailChart(container, userId) {
       A ${radius} ${radius} 0 ${largeArc ? 0 : 1} 1 ${cx} ${cy - radius}
       Z
     `,
-    fill: "rgba(255,255,255,0.12)",
+    fill: "rgba(255,255,255,0.15)",
   }));
 
   // Center text
@@ -99,7 +105,7 @@ export async function renderPassFailChart(container, userId) {
     fill: "#fff",
     "font-size": "22",
     "font-weight": "600",
-  }, [document.createTextNode(`${passed}`)]));
+  }, [`${passed}`]));
 
   svg.appendChild(el("text", {
     x: cx,
@@ -107,7 +113,7 @@ export async function renderPassFailChart(container, userId) {
     "text-anchor": "middle",
     fill: "rgba(255,255,255,0.65)",
     "font-size": "13",
-  }, [document.createTextNode("Passed")]));
+  }, ["Passed"]));
 
   // Legend
   const legendY = height - 28;
