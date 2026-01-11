@@ -22,6 +22,10 @@ body {
     var(--bg);
   color: var(--text-main);
 }
+* { box-sizing: border-box; }
+html, body { overflow-x: hidden; }
+svg { max-width: 100%; display: block; }
+.page { max-width: 1600px; width: 100%; padding: 0 24px; margin: 32px auto; }
 
 h1 {
   font-size: 34px;
