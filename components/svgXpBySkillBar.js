@@ -1,4 +1,4 @@
-function el(tag, attrs = {}, children = []) {
+/*function el(tag, attrs = {}, children = []) {
   const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
   for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
   for (const c of children) n.appendChild(c);
@@ -52,7 +52,7 @@ export function renderXpBySkillBarSvg(container, xpTx) {
     class: "svg-chart",
   });
 
-  /* Axes */
+  
   svg.appendChild(el("line", {
     x1: padding.left,
     y1: padding.top,
@@ -111,4 +111,4 @@ export function renderXpBySkillBarSvg(container, xpTx) {
   });
 
   container.appendChild(svg);
-}
+}*/

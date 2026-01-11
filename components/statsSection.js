@@ -1,9 +1,9 @@
 import { graphqlRequest } from "../services/graphql.js";
 import { renderCumulativeXpLineSvg } from "./svgCumulativeXpLine.js";
-import { renderXpBySkillBarSvg } from "./svgXpBySkillBar.js";
-
+//import { renderXpBySkillBarSvg } from "./svgXpBySkillBar.js";
+import { renderPassFailChart } from "./svgPassFailChart.js";
 export async function renderStatsSection(container, userId) {
-    container.innerHTML += `
+  container.innerHTML += `
     <section class="stats">
       <h2>Statistics</h2>
       <p class="muted">Visualize your XP journey and achievements.</p>
@@ -11,12 +11,13 @@ export async function renderStatsSection(container, userId) {
       <div class="stats-grid">
        <div class="card chart-card" id="chart-cumulative"></div>
         <div class="card chart-card" id="chart-by-skill"></div>
+      <div class="card chart-card" id="chart-pass-fail"></div>
 
       </div>
     </section>
   `;
 
-    const query = `
+  const query = `
     query XpTransactions($userId: Int!) {
       xp: transaction(
         where: {
@@ -32,12 +33,16 @@ export async function renderStatsSection(container, userId) {
     }
   `;
 
-    const data = await graphqlRequest(query, { userId });
-    const xpTx = data.xp || [];
+  const data = await graphqlRequest(query, { userId });
+  const xpTx = data.xp || [];
 
-    // Render Graph 1: cumulative XP line chart
-    renderCumulativeXpLineSvg(document.getElementById("chart-cumulative"), xpTx);
+  // Render Graph 1: cumulative XP line chart
+  renderCumulativeXpLineSvg(document.getElementById("chart-cumulative"), xpTx);
+  await renderPassFailChart(
+    document.getElementById("chart-pass-fail"),
+    userId
+  );
 
-    // Render Graph 2: XP by skill bar chart
-    renderXpBySkillBarSvg(document.getElementById("chart-by-skill"), xpTx);
+  // Render Graph 2: XP by skill bar chart
+  //renderXpBySkillBarSvg(document.getElementById("chart-by-skill"), xpTx);
 }
