@@ -2,10 +2,22 @@ import { graphqlRequest } from "../services/graphql.js";
 
 function el(tag, attrs = {}, children = []) {
   const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
-  for (const c of children) n.appendChild(c);
+
+  for (const [k, v] of Object.entries(attrs)) {
+    n.setAttribute(k, String(v));
+  }
+
+  for (const c of children) {
+    if (typeof c === "string") {
+      n.appendChild(document.createTextNode(c));
+    } else if (c instanceof Node) {
+      n.appendChild(c);
+    }
+  }
+
   return n;
 }
+
 
 export async function renderPassFailChart(container, userId) {
   container.innerHTML = `
