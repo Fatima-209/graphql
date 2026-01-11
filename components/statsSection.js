@@ -10,9 +10,7 @@ export async function renderStatsSection(container, userId) {
 
       <div class="stats-grid">
        <div class="card chart-card" id="chart-cumulative"></div>
-        <div class="card chart-card" id="chart-by-skill"></div>
       <div class="card chart-card" id="chart-pass-fail"></div>
-
       </div>
     </section>
   `;
