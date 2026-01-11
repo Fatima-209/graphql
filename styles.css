@@ -22,9 +22,6 @@ body {
     var(--bg);
   color: var(--text-main);
 }
-html, body {
-  overflow-x: hidden;
-}
 
 h1 {
   font-size: 34px;
@@ -206,9 +203,6 @@ button {
 
 .svg-chart rect {
   filter: drop-shadow(0 6px 14px rgba(155, 92, 255, 0.35));
-}
-svg {
-  max-width: 100%;
 }
 
 /* ------------------ Animations ------------------ */

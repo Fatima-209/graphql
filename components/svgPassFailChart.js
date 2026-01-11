@@ -33,8 +33,8 @@ export async function renderPassFailChart(container, userId) {
       result(where: { userId: { _eq: $userId } }) {
         grade
         object {
-          type
-          path
+           type: { _eq: "project" }
+          path: { _nlike: "%piscine%" }
         }
       }
     }
