@@ -56,7 +56,7 @@ export async function renderPassFailChart(container, userId) {
   const total = passed + failed || 1;
 
   // --- SVG SETUP ---
-  const width = 420;
+  const width = 390;
   const height = 320;
   const radius = 90;
   const cx = width / 2;
@@ -131,7 +131,7 @@ export async function renderPassFailChart(container, userId) {
     x: cx - 60,
     y: legendY + 11,
     fill: "rgba(255,255,255,0.8)",
-    "font-size": "13",
+    "font-size": "14",
   }, [`Pass (${passed})`]));
 
   svg.appendChild(el("rect", {
@@ -147,7 +147,7 @@ export async function renderPassFailChart(container, userId) {
     x: cx + 40,
     y: legendY + 11,
     fill: "rgba(255,255,255,0.8)",
-    "font-size": "13",
+    "font-size": "14",
   }, [`Fail (${failed})`]));
 
   container.appendChild(svg);
