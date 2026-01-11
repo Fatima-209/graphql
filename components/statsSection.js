@@ -1,5 +1,6 @@
 import { renderCumulativeXpLineSvg } from "./svgCumulativeXpLine.js";
 import { renderPassFailChart } from "./svgPassFailChart.js";
+import { graphqlRequest } from "../services/graphql.js";
 
 export async function renderStatsSection(container, userId) {
   container.innerHTML += `
