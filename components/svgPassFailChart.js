@@ -25,13 +25,22 @@ export async function renderPassFailChart(container, userId) {
     <p class="muted">Based on your validated project results.</p>
   `;
 
-  const query = `
-    query PassFail($userId: Int!) {
-      result(where: { userId: { _eq: $userId } }) {
-        grade
+ const query = `
+  query PassFail($userId: Int!) {
+    result(
+      where: {
+        userId: { _eq: $userId }
+        object: {
+          type: { _eq: "project" }
+          path: { _nlike: "%piscine%" }
+        }
       }
+    ) {
+      grade
     }
-  `;
+  }
+`;
+
 
   const data = await graphqlRequest(query, { userId });
   const results = data.result || [];

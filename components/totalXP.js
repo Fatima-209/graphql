@@ -34,14 +34,8 @@ export async function renderTotalXP(container, userId) {
   <div class="stat-item">
     <label>Total XP</label>
     <span>${totalUp.toLocaleString()}</span>
-  </div>
-
-  <div class="stat-item">
-    <label>XP Down</label>
+     <label>XP Down</label>
     <span>${totalDown.toLocaleString()}</span>
-  </div>
-
-  <div class="stat-item">
     <label>Net XP</label>
     <span>${netXP.toLocaleString()}</span>
   </div>
