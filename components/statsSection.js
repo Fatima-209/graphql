@@ -10,12 +10,14 @@ export async function renderStatsSection(container, userId) {
 
       <div class="stats-grid">
         <div class="card chart-card" id="chart-cumulative"></div>
-        <div class="card chart-card" id="chart-pass-fail"></div>
+        <div class="card chart-card" id="chart-project-passfail"></div>
+        <div class="card chart-card" id="chart-piscine-passfail"></div>
       </div>
     </section>
   `;
 
-  const query = `
+  // XP GRAPH (UNCHANGED)
+  const xpQuery = `
     query XpTransactions($userId: Int!) {
       transaction(
         where: {
@@ -30,17 +32,25 @@ export async function renderStatsSection(container, userId) {
     }
   `;
 
-  const data = await graphqlRequest(query, { userId });
-  const xpTx = data.transaction || [];
+  const xpData = await graphqlRequest(xpQuery, { userId });
+  const xpTx = xpData.transaction || [];
 
-  // SAFE calls
   renderCumulativeXpLineSvg(
     document.getElementById("chart-cumulative"),
     xpTx
   );
 
+  // PASS / FAIL — PROJECTS
   await renderPassFailChart(
-    document.getElementById("chart-pass-fail"),
-    userId
+    document.getElementById("chart-project-passfail"),
+    userId,
+    "project"
+  );
+
+  // PASS / FAIL — PISCINE
+  await renderPassFailChart(
+    document.getElementById("chart-piscine-passfail"),
+    userId,
+    "piscine"
   );
 }
