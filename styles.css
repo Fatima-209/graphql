@@ -1,11 +1,11 @@
 :root {
   --bg: #0b0f1a;
-  --card: rgba(255, 255, 255, 0.04);
+  --card: rgba(240, 233, 233, 0.04);
   --card-border: rgba(255, 255, 255, 0.08);
   --text-main: #eaeaf0;
   --text-muted: rgba(234, 234, 240, 0.65);
-  --accent: #9b5cff;
-  --accent-soft: rgba(155, 92, 255, 0.25);
+  --accent: #ffc3de;
+  --accent-soft: rgba(245, 153, 214, 0.25);
 }
 
 /* ------------------ Global ------------------ */
