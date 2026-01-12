@@ -1,5 +1,6 @@
 import { renderCumulativeXpLineSvg } from "./svgCumulativeXpLine.js";
 import { renderPassFailChart } from "./svgPassFailChart.js";
+import { renderPiscineProgressBar } from "./svgPiscineProgressBar.js";
 import { graphqlRequest } from "../services/graphql.js";
 
 export async function renderStatsSection(container, userId) {
@@ -11,12 +12,12 @@ export async function renderStatsSection(container, userId) {
       <div class="stats-grid">
         <div class="card chart-card" id="chart-cumulative"></div>
         <div class="card chart-card" id="chart-project-passfail"></div>
-        <div class="card chart-card" id="chart-piscine-passfail"></div>
+        <div class="card chart-card" id="chart-piscine-progress"></div>
       </div>
     </section>
   `;
 
-  // XP GRAPH (UNCHANGED)
+  // XP CUMULATIVE GRAPH (unchanged)
   const xpQuery = `
     query XpTransactions($userId: Int!) {
       transaction(
@@ -40,17 +41,16 @@ export async function renderStatsSection(container, userId) {
     xpTx
   );
 
-  // PASS / FAIL — PROJECTS
+  // PROJECT PASS / FAIL (pie chart)
   await renderPassFailChart(
     document.getElementById("chart-project-passfail"),
     userId,
     "project"
   );
 
-  // PASS / FAIL — PISCINE
-  await renderPassFailChart(
-    document.getElementById("chart-piscine-passfail"),
-    userId,
-    "piscine"
+  // PISCINE COMPLETION (progress bar)
+  await renderPiscineProgressBar(
+    document.getElementById("chart-piscine-progress"),
+    userId
   );
 }
