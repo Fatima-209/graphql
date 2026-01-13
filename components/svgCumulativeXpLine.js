@@ -150,6 +150,19 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
     [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
     { duration: 1200, easing: "ease-out", fill: "forwards" }
   );
+path.animate(
+  [
+    { filter: "drop-shadow(0 0 6px rgba(247,182,210,0.4))" },
+    { filter: "drop-shadow(0 0 14px rgba(247,182,210,0.7))" },
+    { filter: "drop-shadow(0 0 6px rgba(247,182,210,0.4))" }
+  ],
+  {
+    duration: 1800,
+    iterations: Infinity,
+    easing: "ease-in-out",
+    delay: 1200 // starts after line draws
+  }
+);
 
   container.appendChild(svg);
 }

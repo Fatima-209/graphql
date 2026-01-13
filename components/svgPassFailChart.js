@@ -77,7 +77,7 @@ export async function renderPassFailChart(container, userId, mode) {
       L ${cx} ${cy}
       Z
     `,
-      fill: "rgba(252, 193, 219, 0.9)",
+    fill: "rgba(252, 193, 219, 0.9)",
   }));
 
   // FAIL
@@ -112,11 +112,32 @@ export async function renderPassFailChart(container, userId, mode) {
   // LEGEND
   const legendY = height - 26;
 
-  svg.appendChild(el("rect", { x: cx - 120, y: legendY, width: 14, height: 14, rx: 4,      fill: "rgba(252, 193, 219, 0.9)" }));
+  svg.appendChild(el("rect", { x: cx - 120, y: legendY, width: 14, height: 14, rx: 4, fill: "rgba(252, 193, 219, 0.9)" }));
   svg.appendChild(el("text", { x: cx - 96, y: legendY + 12, fill: "rgba(255,255,255,0.85)", "font-size": "14" }, [`Pass (${passed})`]));
 
   svg.appendChild(el("rect", { x: cx + 20, y: legendY, width: 14, height: 14, rx: 4, fill: "rgba(255,255,255,0.25)" }));
   svg.appendChild(el("text", { x: cx + 44, y: legendY + 12, fill: "rgba(255,255,255,0.85)", "font-size": "14" }, [`Fail (${failed})`]));
+  // for animaiton
+  const paths = svg.querySelectorAll("path");
+
+  paths.forEach((p, i) => {
+    const len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+
+    p.animate(
+      [
+        { strokeDashoffset: len },
+        { strokeDashoffset: 0 }
+      ],
+      {
+        duration: 900,
+        delay: i * 250,
+        easing: "ease-out",
+        fill: "forwards"
+      }
+    );
+  });
 
   container.appendChild(svg);
 }
