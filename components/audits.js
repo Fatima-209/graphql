@@ -90,7 +90,7 @@ export async function renderAuditRatioChart(container) {
         width: 0,
         height: barHeight,
         rx: 6,
-        fill: "rgba(29, 90, 59, 0.95)", 
+        fill: "rgba(29, 90, 59, 0.95)",
     });
 
     const receivedBar = el("rect", {
@@ -137,12 +137,14 @@ export async function renderAuditRatioChart(container) {
 
     svg.appendChild(el("text", {
         x: width / 2,
-        y: 175,
+        y: 180,
         "text-anchor": "middle",
-        fill: "rgba(247,182,210,0.9)",
-        "font-size": 50,
+        fill: "rgba(247,182,210,0.95)",
+        "font-size": 56,
         "font-weight": 700,
+        filter: "drop-shadow(0 0 12px rgba(247,182,210,0.45))",
     }, [ratio]));
+
 
     svg.appendChild(el("text", {
         x: width / 2,
