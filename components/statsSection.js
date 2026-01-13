@@ -1,21 +1,22 @@
 import { renderCumulativeXpLineSvg } from "./svgCumulativeXpLine.js";
 import { renderPassFailChart } from "./svgPassFailChart.js";
-import { renderPiscineProgressBar } from "./svgPiscineProgressBar.js";
+import { renderPiscineHighestGrade } from "./svgPiscineHighestGrade.js";
 import { graphqlRequest } from "../services/graphql.js";
 
 export async function renderStatsSection(container, userId) {
-  container.innerHTML += `
-    <section class="stats">
-      <h2>Statistics</h2>
-      <p class="muted">Visualize your XP journey and achievements.</p>
+container.innerHTML += `
+  <section class="stats">
+    <h2>Statistics</h2>
+    <p class="muted">Visualize your XP journey and achievements.</p>
 
-      <div class="stats-grid">
-        <div class="card chart-card" id="chart-cumulative"></div>
-        <div class="card chart-card" id="chart-project-passfail"></div>
-        <div class="card chart-card" id="chart-piscine-progress"></div>
-      </div>
-    </section>
-  `;
+    <div class="stats-grid">
+      <div class="card chart-card" id="chart-cumulative"></div>
+      <div class="card chart-card" id="chart-project-passfail"></div>
+      <div class="card chart-card" id="chart-piscine-grade"></div>
+    </div>
+  </section>
+`;
+
 
   // XP CUMULATIVE GRAPH (unchanged)
   const xpQuery = `
@@ -49,8 +50,9 @@ export async function renderStatsSection(container, userId) {
   );
 
   // PISCINE COMPLETION (progress bar)
-  await renderPiscineProgressBar(
-    document.getElementById("chart-piscine-progress"),
-    userId
-  );
+ await renderPiscineHighestGrade(
+  document.getElementById("chart-piscine-grade"),
+  userId
+);
+
 }
