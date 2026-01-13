@@ -1,7 +1,7 @@
 import { renderCumulativeXpLineSvg } from "./svgCumulativeXpLine.js";
 import { renderPassFailChart } from "./svgPassFailChart.js";
 import { graphqlRequest } from "../services/graphql.js";
-import { renderPiscineGradesBar } from "./svgPiscineGradesBar.js";
+import { renderProjectGradesBar } from "./svgPiscineGradesBar.js";
 
 export async function renderStatsSection(container, userId) {
 container.innerHTML += `
@@ -51,8 +51,8 @@ container.innerHTML += `
   );
 
 
-await renderPiscineGradesBar(
-  document.getElementById("chart-piscine-grades"),
+await renderProjectGradesBar(
+  document.getElementById("chart-piscine-grade"),
   userId
 );
 
