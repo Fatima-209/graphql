@@ -2,17 +2,31 @@ import { graphqlRequest } from "../services/graphql.js";
 // changed file name
 export async function renderBasicInfo(container) {
   const query = `
-    {
-      user {
-        login
-        id
-        attrs
-      }
-    }
-  `;
+{
+  user {
+    login
+    id
+    attrs
+  }
+
+  audit_up: transaction(where: { type: { _eq: "up" } }) {
+    amount
+  }
+
+  audit_down: transaction(where: { type: { _eq: "down" } }) {
+    amount
+  }
+}
+`;
+
 
   const data = await graphqlRequest(query);
   const user = data.user[0];
+  const auditUp = (data.audit_up || []).reduce((s, a) => s + a.amount, 0);
+  const auditDown = (data.audit_down || []).reduce((s, a) => s + a.amount, 0);
+
+  const auditRatio =
+    auditDown > 0 ? (auditUp / auditDown).toFixed(2) : "∞";
 
   // Extract name safely from attrs
   const firstName = user.attrs?.firstName;
@@ -39,6 +53,11 @@ export async function renderBasicInfo(container) {
         <label>ID</label>
         <span>${user.id}</span>
       </div>
+      <div class="stat-item">
+        <label>Audit Ratio</label>
+        <span>${auditRatio}</span>
+      </div>
+
     </div>
   </section>
 `;

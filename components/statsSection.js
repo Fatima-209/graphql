@@ -2,7 +2,7 @@ import { renderCumulativeXpLineSvg } from "./svgCumulativeXpLine.js";
 import { renderPassFailChart } from "./svgPassFailChart.js";
 import { graphqlRequest } from "../services/graphql.js";
 import { renderProjectGradesBar } from "./svgPiscineGradesBar.js";
-
+import { renderAuditRatioChart } from "./audits.js";
 export async function renderStatsSection(container, userId) {
 container.innerHTML += `
   <section class="stats">
@@ -13,6 +13,8 @@ container.innerHTML += `
       <div class="card chart-card" id="chart-cumulative"></div>
       <div class="card chart-card" id="chart-project-passfail"></div>
       <div class="card chart-card" id="chart-piscine-grades"></div>
+      <div class="card chart-card" id="chart-audit-ratio"></div>
+
     </div>
   </section>
 `;
@@ -54,6 +56,9 @@ container.innerHTML += `
 await renderProjectGradesBar(
   document.getElementById("chart-piscine-grades"),
   userId
+);
+await renderAuditRatioChart(
+  document.getElementById("chart-audit-ratio")
 );
 
 }
