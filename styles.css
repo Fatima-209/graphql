@@ -167,6 +167,7 @@ button {
   min-height: 440px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .chart-card h3 {
