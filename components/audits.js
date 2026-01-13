@@ -4,48 +4,42 @@ function el(tag, attrs = {}, children = []) {
   const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
   for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
   for (const c of children) {
-    if (typeof c === "string") {
-      n.appendChild(document.createTextNode(c));
-    } else if (c instanceof Node) {
-      n.appendChild(c);
-    }
+    if (typeof c === "string") n.appendChild(document.createTextNode(c));
+    else if (c instanceof Node) n.appendChild(c);
   }
   return n;
 }
-
 
 export async function renderAuditRatioChart(container) {
   if (!container) return;
 
   container.innerHTML = `
     <h3>Audit Ratio</h3>
-    <p class="muted">XP received vs XP given to peers</p>
+    <p class="muted">XP given to peers vs XP received</p>
   `;
 
   const query = `
     {
-      up: transaction(where: { type: { _eq: "up" } }) { amount }
-      down: transaction(where: { type: { _eq: "down" } }) { amount }
+      given: transaction(where: { type: { _eq: "up" } }) { amount }
+      received: transaction(where: { type: { _eq: "down" } }) { amount }
     }
   `;
 
   const data = await graphqlRequest(query);
 
-  const up = (data.up || []).reduce((s, a) => s + a.amount, 0);
-  const down = (data.down || []).reduce((s, a) => s + a.amount, 0);
+  const givenXP = (data.given || []).reduce((s, a) => s + a.amount, 0);
+  const receivedXP = (data.received || []).reduce((s, a) => s + a.amount, 0);
 
-  const ratio = down > 0 ? up / down : 1;
-  const capped = Math.min(ratio, 2); // avoid huge arcs
+  const ratio =
+    receivedXP > 0 ? (givenXP / receivedXP).toFixed(2) : "∞";
 
-  const width = 320;
-  const height = 260;
-  const radius = 90;
-  const cx = width / 2;
-  const cy = height / 2 + 10;
+  const max = Math.max(givenXP, receivedXP, 1);
 
-  const angle = capped * Math.PI;
-  const x = cx + radius * Math.cos(angle - Math.PI);
-  const y = cy + radius * Math.sin(angle - Math.PI);
+  const width = 520;
+  const height = 220;
+  const barWidth = 360;
+  const barHeight = 10;
+  const startX = 120;
 
   const svg = el("svg", {
     viewBox: `0 0 ${width} ${height}`,
@@ -53,49 +47,104 @@ export async function renderAuditRatioChart(container) {
     class: "svg-chart",
   });
 
-  // Background arc
-  svg.appendChild(el("path", {
-    d: `
-      M ${cx - radius} ${cy}
-      A ${radius} ${radius} 0 1 1 ${cx + radius} ${cy}
-    `,
-    fill: "none",
-    stroke: "rgba(255,255,255,0.15)",
-    "stroke-width": 16,
-  }));
+  // ---------- Labels ----------
+  svg.appendChild(el("text", {
+    x: 20,
+    y: 70,
+    fill: "rgba(255,255,255,0.85)",
+    "font-size": 14,
+  }, ["Done"]));
 
-  const fg = el("path", {
-    d: `
-      M ${cx - radius} ${cy}
-      A ${radius} ${radius} 0 0 1 ${x} ${y}
-    `,
-    fill: "none",
-    stroke: "rgba(247,182,210,0.95)",
-    "stroke-width": 16,
-    "stroke-linecap": "round",
+  svg.appendChild(el("text", {
+    x: 20,
+    y: 120,
+    fill: "rgba(255,255,255,0.85)",
+    "font-size": 14,
+  }, ["Received"]));
+
+  // ---------- Background bars ----------
+  [70, 120].forEach(y => {
+    svg.appendChild(el("rect", {
+      x: startX,
+      y: y - barHeight / 2,
+      width: barWidth,
+      height: barHeight,
+      rx: 6,
+      fill: "rgba(255,255,255,0.15)",
+    }));
   });
 
-  svg.appendChild(fg);
+  // ---------- Foreground bars ----------
+  const givenW = (givenXP / max) * barWidth;
+  const receivedW = (receivedXP / max) * barWidth;
 
-  // ✨ Animate arc
-  const len = fg.getTotalLength();
-  fg.style.strokeDasharray = len;
-  fg.style.strokeDashoffset = len;
+  const givenBar = el("rect", {
+    x: startX,
+    y: 70 - barHeight / 2,
+    width: 0,
+    height: barHeight,
+    rx: 6,
+    fill: "rgba(247,182,210,0.9)",
+  });
 
-  fg.animate(
-    [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
-    { duration: 1000, easing: "ease-out", fill: "forwards" }
+  const receivedBar = el("rect", {
+    x: startX,
+    y: 120 - barHeight / 2,
+    width: 0,
+    height: barHeight,
+    rx: 6,
+    fill: "rgba(255,255,255,0.7)",
+  });
+
+  svg.append(givenBar, receivedBar);
+
+  // ---------- Animate bars ----------
+  givenBar.animate(
+    [{ width: 0 }, { width: givenW }],
+    { duration: 800, easing: "ease-out", fill: "forwards" }
   );
 
-  // Center text
+  receivedBar.animate(
+    [{ width: 0 }, { width: receivedW }],
+    { duration: 800, delay: 120, easing: "ease-out", fill: "forwards" }
+  );
+
+  // ---------- Values ----------
   svg.appendChild(el("text", {
-    x: cx,
-    y: cy + 6,
-    "text-anchor": "middle",
+    x: startX + barWidth + 10,
+    y: 74,
     fill: "#fff",
+    "font-size": 13,
+  }, [`${(givenXP / 1000).toFixed(2)} MB ↑`]));
+
+  svg.appendChild(el("text", {
+    x: startX + barWidth + 10,
+    y: 124,
+    fill: "rgba(255,255,255,0.7)",
+    "font-size": 13,
+  }, [`${(receivedXP / 1000).toFixed(2)} MB ↓`]));
+
+  // ---------- Ratio & feedback ----------
+  let feedback = "Balanced";
+  if (ratio < 1) feedback = "You can do better";
+  if (ratio > 1.2) feedback = "Great contribution";
+
+  svg.appendChild(el("text", {
+    x: width / 2,
+    y: 175,
+    "text-anchor": "middle",
+    fill: "rgba(247,182,210,0.9)",
     "font-size": 28,
     "font-weight": 700,
-  }, [ratio.toFixed(2)]));
+  }, [ratio]));
+
+  svg.appendChild(el("text", {
+    x: width / 2,
+    y: 198,
+    "text-anchor": "middle",
+    fill: "rgba(255,255,255,0.65)",
+    "font-size": 14,
+  }, [feedback]));
 
   container.appendChild(svg);
 }
