@@ -136,7 +136,7 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
   const path = el("path", {
     d,
     fill: "none",
-    stroke: "rgba(155,92,255,0.95)",
+    stroke:"rgba(252, 193, 219, 0.9)",
     "stroke-width": "3",
     "stroke-linecap": "round",
   });

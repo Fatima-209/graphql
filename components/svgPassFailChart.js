@@ -77,7 +77,7 @@ export async function renderPassFailChart(container, userId, mode) {
       L ${cx} ${cy}
       Z
     `,
-    fill: "rgba(155,92,255,0.92)",
+      fill: "rgba(252, 193, 219, 0.9)",
   }));
 
   // FAIL
@@ -112,7 +112,7 @@ export async function renderPassFailChart(container, userId, mode) {
   // LEGEND
   const legendY = height - 26;
 
-  svg.appendChild(el("rect", { x: cx - 120, y: legendY, width: 14, height: 14, rx: 4, fill: "rgba(155,92,255,0.92)" }));
+  svg.appendChild(el("rect", { x: cx - 120, y: legendY, width: 14, height: 14, rx: 4,      fill: "rgba(252, 193, 219, 0.9)" }));
   svg.appendChild(el("text", { x: cx - 96, y: legendY + 12, fill: "rgba(255,255,255,0.85)", "font-size": "14" }, [`Pass (${passed})`]));
 
   svg.appendChild(el("rect", { x: cx + 20, y: legendY, width: 14, height: 14, rx: 4, fill: "rgba(255,255,255,0.25)" }));
