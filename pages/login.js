@@ -3,18 +3,21 @@ import { renderProfile } from "./profile.js";
 
 export function renderLogin(app) {
   app.innerHTML = `
-    <section class="page">
-      <h1>Login</h1>
+    <section class="login-page">
+      <div class="login-card">
+        <h1 class="login-title">Welcome back</h1>
+        <p class="login-sub">Sign in to your GraphQL dashboard</p>
 
-      <form id="login-form">
-        <input id="identifier" placeholder="Username or Email" required />
-        <input id="password" type="password" placeholder="Password" required />
-        <button type="submit">Login</button>
-      </form>
+        <form id="login-form">
+          <input id="identifier" placeholder="Username or Email" required />
+          <input id="password" type="password" placeholder="Password" required />
+          <button type="submit" class="login-btn">Login</button>
+        </form>
 
-      <p id="login-error" class="error hidden">
-        Invalid credentials
-      </p>
+        <p id="login-error" class="error hidden">
+          Invalid credentials
+        </p>
+      </div>
     </section>
   `;
 
@@ -22,18 +25,18 @@ export function renderLogin(app) {
     .getElementById("login-form")
     .addEventListener("submit", async (e) => {
       e.preventDefault();
-
-      const identifier = document.getElementById("identifier").value;
-      const password = document.getElementById("password").value;
-      const errorEl = document.getElementById("login-error");
-
-      errorEl.classList.add("hidden");
-
       try {
-        await login(identifier, password);
+        await login(
+          identifier.value,
+          password.value
+        );
         renderProfile(app);
       } catch {
-        errorEl.classList.remove("hidden");
+        document.getElementById("login-error").classList.remove("hidden");
       }
     });
 }
+
+
+  
+

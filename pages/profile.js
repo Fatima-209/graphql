@@ -7,12 +7,16 @@ import { renderLevel } from "../components/renderLevel.js";
 import { renderStatsSection } from "../components/statsSection.js";
 export async function renderProfile(app) {
   app.innerHTML = `
+    <header class="top-bar">
+      <span class="logo">GraphQL Profile</span>
+      <button id="logout-btn" class="logout-btn">Logout</button>
+    </header>
+
     <section class="page">
-      <h1>Profile</h1>
       <div id="profile-content">Loading...</div>
-      <button id="logout-btn">Logout</button>
     </section>
   `;
+
 
   document.getElementById("logout-btn").addEventListener("click", () => {
     logout();
