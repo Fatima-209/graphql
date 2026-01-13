@@ -112,29 +112,14 @@ export async function renderProjectGradesBar(container, userId) {
 
     const rect = el("rect", {
       x,
-      y: height - padding.bottom, 
+      y,
       width: barWidth,
-      height: 0,
+      height: barHeight,
       rx: 8,
       fill: "rgba(252, 193, 219, 0.9)",
       cursor: "pointer",
     });
 
-    svg.appendChild(rect);
-
-    // Animate bar growing
-    rect.animate(
-      [
-        { height: 0, y: height - padding.bottom },
-        { height: barHeight, y }
-      ],
-      {
-        duration: 700,
-        delay: i * 120, // stagger ✨
-        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-        fill: "forwards"
-      }
-    );
     // Tooltip (native SVG title)
     rect.appendChild(
       el("title", {}, [
