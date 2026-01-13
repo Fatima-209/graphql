@@ -52,7 +52,7 @@ container.innerHTML += `
 
 
 await renderProjectGradesBar(
-  document.getElementById("chart-piscine-grade"),
+  document.getElementById("chart-piscine-grades"),
   userId
 );
 

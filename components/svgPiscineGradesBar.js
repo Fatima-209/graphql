@@ -18,7 +18,6 @@ export async function renderProjectGradesBar(container, userId) {
     <p class="muted">Highest grades achieved across validated projects.</p>
   `;
 
-  // ✅ PROJECTS ONLY (exclude piscine + checkpoints)
   const query = `
     query ProjectGrades($userId: Int!) {
       progress(
