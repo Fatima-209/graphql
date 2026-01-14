@@ -13,13 +13,11 @@ function el(tag, attrs = {}, children = []) {
   return n;
 }
 
-/* ---------- XP formatter ---------- */
 function formatXP(amount) {
   if (amount >= 1024) return (amount / 1024).toFixed(2) + " MB";
   return amount.toFixed(0) + " KB";
 }
 
-/* ---------- Main ---------- */
 export async function renderAuditRatioChart(container) {
   if (!container) return;
 
@@ -47,17 +45,17 @@ export async function renderAuditRatioChart(container) {
   if (ratio < 1) feedback = "You can do better!";
   if (ratio > 1.2) feedback = "Great contribution!";
 
-  /* ---------- SCALE UP EVERYTHING ---------- */
-  const width = 700;
-  const height = 420;
+  /* ---------- BIG SVG (INTENTIONALLY) ---------- */
+  const width = 1200;
+  const height = 500;
 
   const leftX = 40;
-  const barX = 180;
-  const barWidth = 440;
-  const barHeight = 14;
+  const barX = 300;
+  const barWidth = 800;
+  const barHeight = 24;
 
-  const doneY = 120;
-  const receivedY = 180;
+  const doneY = 140;
+  const receivedY = 220;
 
   const max = Math.max(givenXP, receivedXP, 1);
   const givenW = (givenXP / max) * barWidth;
@@ -66,24 +64,27 @@ export async function renderAuditRatioChart(container) {
   const svg = el("svg", {
     viewBox: `0 0 ${width} ${height}`,
     width: "100%",
-    class: "svg-chart",
+    style: `
+      transform: scale(1.35);
+      transform-origin: top left;
+    `,
   });
 
   /* ---------- DONE ---------- */
   svg.appendChild(el("text", {
     x: leftX,
-    y: doneY - 18,
+    y: doneY - 24,
     fill: "#ffffff",
-    "font-size": 18,
+    "font-size": 28,
     "font-weight": 700,
   }, ["Done"]));
 
   svg.appendChild(el("text", {
-    x: width - 40,
-    y: doneY - 18,
+    x: width - 60,
+    y: doneY - 24,
     "text-anchor": "end",
     fill: "#ffffff",
-    "font-size": 18,
+    "font-size": 28,
     "font-weight": 600,
   }, [`${formatXP(givenXP)} ↑`]));
 
@@ -92,8 +93,8 @@ export async function renderAuditRatioChart(container) {
     y: doneY,
     width: barWidth,
     height: barHeight,
-    rx: 8,
-    fill: "rgba(255,255,255,0.15)",
+    rx: 14,
+    fill: "rgba(255,255,255,0.18)",
   }));
 
   const givenBar = el("rect", {
@@ -101,32 +102,32 @@ export async function renderAuditRatioChart(container) {
     y: doneY,
     width: 0,
     height: barHeight,
-    rx: 8,
-    fill: "#f0c14b", // reboot gold
+    rx: 14,
+    fill: "#f0c14b",
   });
 
   svg.appendChild(givenBar);
 
   givenBar.animate(
     [{ width: "0px" }, { width: `${givenW}px` }],
-    { duration: 900, easing: "ease-out", fill: "forwards" }
+    { duration: 1000, easing: "ease-out", fill: "forwards" }
   );
 
   /* ---------- RECEIVED ---------- */
   svg.appendChild(el("text", {
     x: leftX,
-    y: receivedY - 18,
+    y: receivedY - 24,
     fill: "#ffffff",
-    "font-size": 18,
+    "font-size": 28,
     "font-weight": 700,
   }, ["Received"]));
 
   svg.appendChild(el("text", {
-    x: width - 40,
-    y: receivedY - 18,
+    x: width - 60,
+    y: receivedY - 24,
     "text-anchor": "end",
-    fill: "rgba(255,255,255,0.8)",
-    "font-size": 18,
+    fill: "rgba(255,255,255,0.85)",
+    "font-size": 28,
     "font-weight": 600,
   }, [`${formatXP(receivedXP)} ↓`]));
 
@@ -135,8 +136,8 @@ export async function renderAuditRatioChart(container) {
     y: receivedY,
     width: barWidth,
     height: barHeight,
-    rx: 8,
-    fill: "rgba(255,255,255,0.15)",
+    rx: 14,
+    fill: "rgba(255,255,255,0.18)",
   }));
 
   const receivedBar = el("rect", {
@@ -144,7 +145,7 @@ export async function renderAuditRatioChart(container) {
     y: receivedY,
     width: 0,
     height: barHeight,
-    rx: 8,
+    rx: 14,
     fill: "#ffffff",
   });
 
@@ -152,23 +153,23 @@ export async function renderAuditRatioChart(container) {
 
   receivedBar.animate(
     [{ width: "0px" }, { width: `${receivedW}px` }],
-    { duration: 900, delay: 120, easing: "ease-out", fill: "forwards" }
+    { duration: 1000, delay: 120, easing: "ease-out", fill: "forwards" }
   );
 
-  /* ---------- HUGE RATIO (REBOOT STYLE) ---------- */
+  /* ---------- HUGE RATIO ---------- */
   svg.appendChild(el("text", {
     x: leftX,
-    y: 300,
+    y: 380,
     fill: "#f0c14b",
-    "font-size": 120,
+    "font-size": 180,
     "font-weight": 800,
   }, [ratio]));
 
   svg.appendChild(el("text", {
-    x: leftX + 170,
-    y: 300,
+    x: leftX + 260,
+    y: 380,
     fill: "#f0c14b",
-    "font-size": 24,
+    "font-size": 36,
     "font-weight": 600,
   }, [feedback]));
 
