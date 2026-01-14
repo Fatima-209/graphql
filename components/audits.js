@@ -43,7 +43,7 @@ export async function renderAuditRatioChart(container) {
 
   let feedback = "Balanced";
   if (ratio < 1) feedback = "You can do better!";
-  if (ratio > 1.2) feedback = "Great contribution!";
+  if (ratio > 1.1) feedback = "Great contribution!";
 
   /* ---------- BIG SVG (INTENTIONALLY) ---------- */
   const width = 1200;
@@ -51,7 +51,7 @@ export async function renderAuditRatioChart(container) {
 
   const leftX = 40;
   const barX = 300;
-  const barWidth = 800;
+  const barWidth = 700;
   const barHeight = 24;
 
   const doneY = 140;
@@ -76,7 +76,7 @@ export async function renderAuditRatioChart(container) {
     y: doneY - 24,
     fill: "#ffffff",
     "font-size": 28,
-    "font-weight": 700,
+    "font-weight": 500,
   }, ["Done"]));
 
   svg.appendChild(el("text", {
@@ -161,8 +161,8 @@ export async function renderAuditRatioChart(container) {
     x: leftX,
     y: 380,
     fill: "#f0c14b",
-    "font-size": 180,
-    "font-weight": 800,
+    "font-size": 120,
+    "font-weight": 600,
   }, [ratio]));
 
   svg.appendChild(el("text", {
