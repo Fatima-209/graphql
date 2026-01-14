@@ -156,7 +156,7 @@ export async function renderAuditRatioChart(container) {
   svg.appendChild(el("text", {
     x: ratioX,
     y: ratioY,
-    fill: "#f0c14b",
+    fill: "#f7b6d2",
     "font-size": 96,
     "font-weight": 800,
   }, [ratio]));
@@ -164,7 +164,7 @@ export async function renderAuditRatioChart(container) {
   svg.appendChild(el("text", {
     x: ratioX,
     y: ratioY + 28,
-    fill: "#f0c14b",
+    fill: "#f7b6d2",
     "font-size": 18,
     "font-weight": 600,
   }, [feedback]));
