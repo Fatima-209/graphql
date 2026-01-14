@@ -94,7 +94,7 @@ export async function renderAuditRatioChart(container) {
     width: 0,
     height: barHeight,
     rx: 8,
-    fill: "#f0c14b",
+    fill: "#f7b6d2",
   });
 
   svg.appendChild(givenBar);
