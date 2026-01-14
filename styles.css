@@ -254,6 +254,20 @@ button {
   font-weight: 600;
   margin-top: 6px;
 }
+/* Make audit card typography readable */
+.audit-card svg text {
+  font-size: 18px;
+}
+
+.audit-card .ratio-number {
+  font-size: 72px;
+  font-weight: 800;
+}
+
+.audit-card .ratio-feedback {
+  font-size: 20px;
+  font-weight: 600;
+}
 
 /* ------------------ Charts ------------------ */
 

@@ -154,6 +154,7 @@ export async function renderAuditRatioChart(container) {
 
   /* ---------- RATIO ---------- */
   svg.appendChild(el("text", {
+    class: "ratio-number",
     x: ratioX,
     y: ratioY,
     fill: "#f7b6d2",
@@ -162,6 +163,7 @@ export async function renderAuditRatioChart(container) {
   }, [ratio]));
 
   svg.appendChild(el("text", {
+    class: "ratio-feedback",
     x: ratioX,
     y: ratioY + 28,
     fill: "#f7b6d2",
