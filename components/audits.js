@@ -117,35 +117,40 @@ export async function renderAuditRatioChart(container) {
     );
 
 
-    // ---------- Values ----------
+    // Done value
     svg.appendChild(el("text", {
-        x: startX + barWidth + 10,
+        x: startX - 10,
         y: 74,
+        "text-anchor": "end",
         fill: "#fff",
-        "font-size": 13,
+        "font-size": 14,
+        "font-weight": 600,
     }, [`${formatXP(givenXP)} ↑`]));
 
+    // Received value
     svg.appendChild(el("text", {
-        x: startX + barWidth + 10,
+        x: startX - 10,
         y: 124,
-        fill: "rgba(255,255,255,0.7)",
-        "font-size": 13,
+        "text-anchor": "end",
+        fill: "rgba(255,255,255,0.75)",
+        "font-size": 14,
+        "font-weight": 600,
     }, [`${formatXP(receivedXP)} ↓`]));
 
     // ---------- Ratio & feedback ----------
     let feedback = "Balanced";
     if (ratio < 1) feedback = "You can do better";
     if (ratio > 1.2) feedback = "Great contribution";
-
     svg.appendChild(el("text", {
         x: width / 2,
-        y: 180,
+        y: 200,
         "text-anchor": "middle",
-        fill: "rgba(247,182,210,0.95)",
-        "font-size": 56,
-        "font-weight": 700,
-        filter: "drop-shadow(0 0 12px rgba(247,182,210,0.45))",
+        fill: "#f7b6d2",
+        "font-size": 72,
+        "font-weight": 800,
+        filter: "drop-shadow(0 0 16px rgba(247,182,210,0.6))",
     }, [ratio]));
+
 
 
     svg.appendChild(el("text", {
@@ -153,7 +158,7 @@ export async function renderAuditRatioChart(container) {
         y: 198,
         "text-anchor": "middle",
         fill: "rgba(255,255,255,0.65)",
-        "font-size": 14,
+        "font-size": 30,
     }, [feedback]));
 
     container.appendChild(svg);
