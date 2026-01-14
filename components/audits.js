@@ -43,7 +43,7 @@ export async function renderAuditRatioChart(container) {
 
     const width = 520;
     const height = 220;
-    const barWidth = "360px";
+    const barWidth = 360;
     const barHeight = 10;
     const startX = 120;
 
