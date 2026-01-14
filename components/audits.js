@@ -43,7 +43,7 @@ export async function renderAuditRatioChart(container) {
 
     const width = 520;
     const height = 220;
-    const barWidth = 360;
+    const barWidth = "360px";
     const barHeight = 10;
     const startX = 120;
 
@@ -106,14 +106,16 @@ export async function renderAuditRatioChart(container) {
 
     // ---------- Animate bars ----------
     givenBar.animate(
-        [{ width: 0 }, { width: givenW }],
+        [{ width: "0px" }, { width: `${givenW}px` }],
         { duration: 800, easing: "ease-out", fill: "forwards" }
     );
 
+
     receivedBar.animate(
-        [{ width: 0 }, { width: receivedW }],
+        [{ width: "0px" }, { width: `${receivedW}px` }],
         { duration: 800, delay: 120, easing: "ease-out", fill: "forwards" }
     );
+
 
     // ---------- Values ----------
     svg.appendChild(el("text", {
