@@ -386,6 +386,14 @@ button {
   flex: none !important;
   overflow: visible;
 }
+.xp-scroll {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.xp-scroll svg {
+  min-width: 1400px;
+}
 
 /* ------------------ Animations ------------------ */
 

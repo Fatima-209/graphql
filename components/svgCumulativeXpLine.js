@@ -26,9 +26,14 @@ function groupByDay(transactions) {
 
 export function renderCumulativeXpLineSvg(container, xpTx) {
   container.innerHTML = `
-    <h3>Skills Progression (Cumulative XP Over Time)</h3>
-    <p class="muted">XP growth over time based on validated completions.</p>
-  `;
+  <h3>Skills Progression (Cumulative XP Over Time)</h3>
+  <p class="muted">XP growth over time based on validated project completions.</p>
+  <div class="xp-scroll"></div>
+`;
+
+  const scroll = container.querySelector(".xp-scroll");
+  scroll.appendChild(svg);
+
 
   const width = 1430;
   const height = 420;
@@ -101,7 +106,7 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
   }
 
   /* X ticks */
-  const tickCount = 6;
+  const tickCount = Math.min(8, points.length - 1);
   for (let i = 0; i <= tickCount; i++) {
     const t = minX + (i / tickCount) * (maxX - minX);
     const x = scaleX(t);
@@ -136,7 +141,7 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
   const path = el("path", {
     d,
     fill: "none",
-    stroke:"rgba(252, 193, 219, 0.9)",
+    stroke: "rgba(252, 193, 219, 0.9)",
     "stroke-width": "3",
     "stroke-linecap": "round",
   });
@@ -150,19 +155,19 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
     [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
     { duration: 1200, easing: "ease-out", fill: "forwards" }
   );
-path.animate(
-  [
-    { filter: "drop-shadow(0 0 6px rgba(247,182,210,0.4))" },
-    { filter: "drop-shadow(0 0 14px rgba(247,182,210,0.7))" },
-    { filter: "drop-shadow(0 0 6px rgba(247,182,210,0.4))" }
-  ],
-  {
-    duration: 1800,
-    iterations: Infinity,
-    easing: "ease-in-out",
-    delay: 1200 // starts after line draws
-  }
-);
+  path.animate(
+    [
+      { filter: "drop-shadow(0 0 6px rgba(247,182,210,0.4))" },
+      { filter: "drop-shadow(0 0 14px rgba(247,182,210,0.7))" },
+      { filter: "drop-shadow(0 0 6px rgba(247,182,210,0.4))" }
+    ],
+    {
+      duration: 1800,
+      iterations: Infinity,
+      easing: "ease-in-out",
+      delay: 1200 // starts after line draws
+    }
+  );
 
   container.appendChild(svg);
 }
