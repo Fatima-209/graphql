@@ -1,11 +1,8 @@
 import { graphqlRequest } from "../services/graphql.js";
 
-/* ---------- SVG helper ---------- */
 function el(tag, attrs = {}, children = []) {
   const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    n.setAttribute(k, String(v));
-  }
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
   for (const c of children) {
     if (typeof c === "string") n.appendChild(document.createTextNode(c));
     else if (c instanceof Node) n.appendChild(c);
@@ -21,17 +18,18 @@ export async function renderPassFailChart(container, userId, mode) {
 
   container.innerHTML = `
     <h3>${mode === "piscine" ? "Piscine Outcomes" : "Project Outcomes"} (Pass / Fail)</h3>
-    <p class="muted">Based on final validated result per project.</p>
+    <p class="muted">Counts only validated completions (isDone = true).</p>
   `;
 
-  /* ---------- FETCH DATA ---------- */
+  // ✅ IMPORTANT: include isDone so we only count validated/completed items
   const query = `
     query Progress($userId: Int!) {
       progress(
-        where: { userId: { _eq: $userId } }
+        where: { userId: { _eq: $userId }, isDone: { _eq: true } }
       ) {
         grade
         path
+        isDone
       }
     }
   `;
@@ -39,7 +37,7 @@ export async function renderPassFailChart(container, userId, mode) {
   const data = await graphqlRequest(query, { userId });
   const rows = data?.progress ?? [];
 
-  /* ---------- FILTER BY MODE ---------- */
+  // FILTER BY MODE (same rule you had)
   const filtered = rows.filter(r => {
     const p = r.path?.toLowerCase() ?? "";
     if (mode === "piscine") {
@@ -48,40 +46,32 @@ export async function renderPassFailChart(container, userId, mode) {
     return !p.includes("piscine") && !p.includes("checkpoint");
   });
 
-  /* ---------- CORRECT PASS / FAIL LOGIC ---------- */
   /**
-   * Reboot01 details:
-   * - progress contains retries & checkpoints
-   * - failed projects often have grade = null
-   * - only ONE final result per project matters
+   * ✅ Correct counting:
+   * - progress can still include multiple entries per project
+   * - group by path and keep the best (highest) grade
+   * - treat null grade as fail (-1)
    */
+  const bestGradePerPath = new Map();
 
-  const bestGradePerProject = new Map();
+  for (const r of filtered) {
+    if (!r.path) continue;
 
-  filtered.forEach(r => {
-    if (!r.path) return;
+    const grade = (r.grade === null || r.grade === undefined) ? -1 : Number(r.grade);
+    const prev = bestGradePerPath.get(r.path);
 
-    // Treat null / undefined grades as FAIL
-    const grade =
-      r.grade === null || r.grade === undefined
-        ? -1
-        : Number(r.grade);
-
-    const prev = bestGradePerProject.get(r.path);
-
-    // Keep the highest grade per project
     if (prev === undefined || grade > prev) {
-      bestGradePerProject.set(r.path, grade);
+      bestGradePerPath.set(r.path, grade);
     }
-  });
+  }
 
-  const finalGrades = [...bestGradePerProject.values()];
+  const finalGrades = [...bestGradePerPath.values()];
 
   const passed = finalGrades.filter(g => g >= 1).length;
   const failed = finalGrades.filter(g => g < 1).length;
   const total = passed + failed || 1;
 
-  /* ---------- SVG SETUP ---------- */
+  // SVG SETUP
   const width = 520;
   const height = 360;
   const radius = 110;
@@ -100,7 +90,7 @@ export async function renderPassFailChart(container, userId, mode) {
     class: "svg-chart",
   });
 
-  /* ---------- PASS SLICE ---------- */
+  // PASS
   svg.appendChild(el("path", {
     d: `
       M ${cx} ${cy - radius}
@@ -111,7 +101,7 @@ export async function renderPassFailChart(container, userId, mode) {
     fill: "rgba(252, 193, 219, 0.9)",
   }));
 
-  /* ---------- FAIL SLICE ---------- */
+  // FAIL
   svg.appendChild(el("path", {
     d: `
       M ${cx} ${cy}
@@ -122,12 +112,12 @@ export async function renderPassFailChart(container, userId, mode) {
     fill: "rgba(255,255,255,0.18)",
   }));
 
-  /* ---------- CENTER TEXT ---------- */
+  // CENTER TEXT
   svg.appendChild(el("text", {
     x: cx,
     y: cy - 8,
     "text-anchor": "middle",
-    fill: "#ffffff",
+    fill: "#fff",
     "font-size": "26",
     "font-weight": "700",
   }, [`${passed}`]));
@@ -140,7 +130,7 @@ export async function renderPassFailChart(container, userId, mode) {
     "font-size": "14",
   }, ["Passed"]));
 
-  /* ---------- LEGEND ---------- */
+  // LEGEND
   const legendY = height - 26;
 
   svg.appendChild(el("rect", {
@@ -149,14 +139,14 @@ export async function renderPassFailChart(container, userId, mode) {
     width: 14,
     height: 14,
     rx: 4,
-    fill: "rgba(252, 193, 219, 0.9)",
+    fill: "rgba(252, 193, 219, 0.9)"
   }));
 
   svg.appendChild(el("text", {
     x: cx - 96,
     y: legendY + 12,
     fill: "rgba(255,255,255,0.85)",
-    "font-size": "14",
+    "font-size": "14"
   }, [`Pass (${passed})`]));
 
   svg.appendChild(el("rect", {
@@ -165,30 +155,26 @@ export async function renderPassFailChart(container, userId, mode) {
     width: 14,
     height: 14,
     rx: 4,
-    fill: "rgba(255,255,255,0.25)",
+    fill: "rgba(255,255,255,0.25)"
   }));
 
   svg.appendChild(el("text", {
     x: cx + 44,
     y: legendY + 12,
     fill: "rgba(255,255,255,0.85)",
-    "font-size": "14",
+    "font-size": "14"
   }, [`Fail (${failed})`]));
 
-  /* ---------- ANIMATION ---------- */
-  svg.querySelectorAll("path").forEach((p, i) => {
+  // animation
+  const paths = svg.querySelectorAll("path");
+  paths.forEach((p, i) => {
     const len = p.getTotalLength();
     p.style.strokeDasharray = len;
     p.style.strokeDashoffset = len;
 
     p.animate(
       [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
-      {
-        duration: 900,
-        delay: i * 250,
-        easing: "ease-out",
-        fill: "forwards",
-      }
+      { duration: 900, delay: i * 250, easing: "ease-out", fill: "forwards" }
     );
   });
 
