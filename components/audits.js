@@ -27,19 +27,34 @@ export async function renderAuditRatioChart(container) {
   `;
 
   const query = `
-    {
-      given: transaction(where: { type: { _eq: "up" } }) { amount }
-      received: transaction(where: { type: { _eq: "down" } }) { amount }
+  query Audit($userId: Int!) {
+    given: transaction(
+      where: {
+        userId: { _eq: $userId }
+        type: { _eq: "up" }
+      }
+    ) {
+      amount
     }
-  `;
 
-  const data = await graphqlRequest(query);
+    received: transaction(
+      where: {
+        userId: { _eq: $userId }
+        type: { _eq: "down" }
+      }
+    ) {
+      amount
+    }
+  }
+`;
+
+const data = await graphqlRequest(query, { userId });
 
   const givenXP = (data.given || []).reduce((s, a) => s + a.amount, 0);
   const receivedXP = (data.received || []).reduce((s, a) => s + a.amount, 0);
 
-  const ratio =
-    receivedXP > 0 ? (givenXP / receivedXP).toFixed(2) : "∞";
+  const rawRatio = receivedXP > 0 ? givenXP / receivedXP : Infinity;
+const ratio = rawRatio === Infinity ? "∞" : rawRatio.toFixed(1);
 
   let feedback = "Balanced";
   if (ratio < 1) feedback = "You can do better!";
