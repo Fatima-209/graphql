@@ -47,17 +47,17 @@ export async function renderAuditRatioChart(container) {
 
   /* ---------- LAYOUT CONSTANTS ---------- */
   const width = 700;
-  const height = 320;
+  const height = 300;
 
-  const labelX = 24;
-  const barX = 160;
+  const labelX = 28;
+  const barX = 180;
   const barWidth = 380;
-  const barHeight = 16;
+  const barHeight = 18;
 
-  const doneY = 90;
-  const receivedY = 140;
+  const doneY = 100;
+  const receivedY = 160;
 
-  const ratioY = 230;
+  const ratioY = 240;
   const ratioX = barX + barWidth + 20;
 
   const max = Math.max(givenXP, receivedXP, 1);
