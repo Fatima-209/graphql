@@ -4,7 +4,7 @@ import { graphqlRequest } from "../services/graphql.js";
 import { renderProjectGradesBar } from "./svgPiscineGradesBar.js";
 import { renderAuditRatioChart } from "./audits.js";
 export async function renderStatsSection(container, userId) {
-container.innerHTML += `
+  container.innerHTML += `
   <section class="stats">
     <h2>Statistics</h2>
     <p class="muted">Visualize your XP journey and achievements.</p>
@@ -13,7 +13,7 @@ container.innerHTML += `
       <div class="card chart-card" id="chart-cumulative"></div>
       <div class="card chart-card" id="chart-project-passfail"></div>
       <div class="card chart-card" id="chart-piscine-grades"></div>
-<div class="card chart-card audit-card" id="chart-audit-ratio"></div>
+      <div class="card chart-card audit-card" id="chart-audit-ratio"></div>
 
     </div>
   </section>
@@ -53,12 +53,12 @@ container.innerHTML += `
   );
 
 
-await renderProjectGradesBar(
-  document.getElementById("chart-piscine-grades"),
-  userId
-);
-await renderAuditRatioChart(
-  document.getElementById("chart-audit-ratio")
-);
+  await renderProjectGradesBar(
+    document.getElementById("chart-piscine-grades"),
+    userId
+  );
+  await renderAuditRatioChart(
+    document.getElementById("chart-audit-ratio")
+  );
 
 }

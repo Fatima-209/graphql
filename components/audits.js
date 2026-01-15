@@ -46,7 +46,7 @@ export async function renderAuditRatioChart(container) {
   if (ratio > 1.1) feedback = "Great contribution!";
 
   /* ---------- LAYOUT CONSTANTS ---------- */
-  const width = 700;
+  const width = 760;
   const height = 360;
 
   const labelX = 30;
