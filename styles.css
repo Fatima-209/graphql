@@ -376,6 +376,17 @@ button {
   color: rgba(234,234,240,0.55);
   word-break: break-word;
 }
+/* Fix audit SVG clipping */
+.audit-card {
+  overflow: visible;
+}
+
+.audit-card svg {
+  height: auto !important;
+  flex: none !important;
+  overflow: visible;
+}
+
 /* ------------------ Animations ------------------ */
 
 @keyframes fadeUp {
