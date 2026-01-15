@@ -58,7 +58,7 @@ export async function renderAuditRatioChart(container) {
   const receivedY = 160;
 
   const ratioY = 240;
-  const ratioX = barX + barWidth + 20;
+  const ratioX = width / 2;
 
   const max = Math.max(givenXP, receivedXP, 1);
   const givenW = (givenXP / max) * barWidth;
@@ -155,6 +155,7 @@ export async function renderAuditRatioChart(container) {
   /* ---------- RATIO ---------- */
   svg.appendChild(el("text", {
     class: "ratio-number",
+    "text-anchor": "middle",
     x: ratioX,
     y: ratioY,
     fill: "#f7b6d2",
@@ -164,6 +165,7 @@ export async function renderAuditRatioChart(container) {
 
   svg.appendChild(el("text", {
     class: "ratio-feedback",
+    "text-anchor": "middle",
     x: ratioX,
     y: ratioY + 28,
     fill: "#f7b6d2",
