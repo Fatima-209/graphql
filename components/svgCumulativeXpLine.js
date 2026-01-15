@@ -30,7 +30,7 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
     <p class="muted">XP growth over time based on validated completions.</p>
   `;
 
-  const width = 1400;
+  const width = 1430;
   const height = 420;
   const padding = { top: 40, right: 40, bottom: 60, left: 90 };
 
