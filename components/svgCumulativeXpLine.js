@@ -31,8 +31,8 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
   <div class="xp-scroll"></div>
 `;
 
-  // const scroll = container.querySelector(".xp-scroll");
-  // scroll.appendChild(svg);
+  const scroll = container.querySelector(".xp-scroll");
+  scroll.appendChild(svg);
 
 
   const width = 1430;
