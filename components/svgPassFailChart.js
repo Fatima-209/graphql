@@ -48,8 +48,6 @@ export async function renderPassFailChart(container, userId, mode) {
     if (p.includes("rush")) return false;
     if (p.includes("onboarding")) return false;
 
-    // ✅ Must look like a real project path
-    // example: /module/ft_printf
     return p.split("/").length >= 3;
   });
 
@@ -114,23 +112,7 @@ export async function renderPassFailChart(container, userId, mode) {
     }));
   }
 
-  /* ---------- CENTER TEXT ---------- */
-  svg.appendChild(el("text", {
-    x: cx,
-    y: cy - 6,
-    "text-anchor": "middle",
-    fill: "#fff",
-    "font-size": "26",
-    "font-weight": "700",
-  }, [`${passed}`]));
-
-  svg.appendChild(el("text", {
-    x: cx,
-    y: cy + 20,
-    "text-anchor": "middle",
-    fill: "rgba(255,255,255,0.65)",
-    "font-size": "14",
-  }, ["Passed"]));
+  
 
   /* ---------- LEGEND ---------- */
   const y = height - 26;
