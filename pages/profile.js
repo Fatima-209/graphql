@@ -45,7 +45,7 @@ try {
 
   await renderBasicInfo(content);
   await renderTotalXP(content, userId);
-  await renderLevel(content);
+await renderLevel(content, userId);
   await renderStatsSection(content, userId);
 
 } catch (err) {

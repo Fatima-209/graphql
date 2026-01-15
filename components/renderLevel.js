@@ -1,30 +1,32 @@
 import { graphqlRequest } from "../services/graphql.js";
 
-export async function renderLevel(container) {
+export async function renderLevel(container, userId) {
   const query = `
-    {
-      progress(
-        where: { grade: { _is_null: false } }
-        order_by: { grade: desc }
+    query Level($userId: Int!) {
+      level: transaction(
+        where: {
+          userId: { _eq: $userId }
+          type: { _eq: "level" }
+        }
+        order_by: { amount: desc }
         limit: 1
       ) {
-        grade
+        amount
       }
     }
   `;
 
-  const data = await graphqlRequest(query);
-  const current = data.progress[0];
+  const data = await graphqlRequest(query, { userId });
 
-  const raw = current?.grade ?? 0;
-  const level = Math.round(raw * 10);
+  const level =
+    data.level && data.level.length > 0
+      ? data.level[0].amount
+      : 0;
 
   container.innerHTML += `
-  <div class="stat-item">
-    <label>Level</label>
-    <span>${level}</span>
-  </div>
-`;
-
+    <div class="stat-item">
+      <label>Level</label>
+      <span>${level}</span>
+    </div>
+  `;
 }
-
