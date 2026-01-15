@@ -21,10 +21,10 @@ export async function renderPassFailChart(container, userId, mode) {
 
   container.innerHTML = `
     <h3>${mode === "piscine" ? "Piscine Outcomes" : "Project Outcomes"} (Pass / Fail)</h3>
-    <p class="muted">Based on final validated results per project.</p>
+    <p class="muted">Based on final validated result per project.</p>
   `;
 
-  /* ---------- DATA FETCH ---------- */
+  /* ---------- FETCH DATA ---------- */
   const query = `
     query Progress($userId: Int!) {
       progress(
@@ -49,18 +49,28 @@ export async function renderPassFailChart(container, userId, mode) {
   });
 
   /* ---------- CORRECT PASS / FAIL LOGIC ---------- */
-  // Each project can appear multiple times due to retries/checkpoints.
-  // We keep ONLY the highest grade per project path.
+  /**
+   * Reboot01 details:
+   * - progress contains retries & checkpoints
+   * - failed projects often have grade = null
+   * - only ONE final result per project matters
+   */
 
   const bestGradePerProject = new Map();
 
   filtered.forEach(r => {
-    if (!r.path || r.grade == null) return;
+    if (!r.path) return;
 
-    const grade = Number(r.grade);
-    const previous = bestGradePerProject.get(r.path);
+    // Treat null / undefined grades as FAIL
+    const grade =
+      r.grade === null || r.grade === undefined
+        ? -1
+        : Number(r.grade);
 
-    if (previous === undefined || grade > previous) {
+    const prev = bestGradePerProject.get(r.path);
+
+    // Keep the highest grade per project
+    if (prev === undefined || grade > prev) {
       bestGradePerProject.set(r.path, grade);
     }
   });
@@ -112,7 +122,7 @@ export async function renderPassFailChart(container, userId, mode) {
     fill: "rgba(255,255,255,0.18)",
   }));
 
-  /* ---------- CENTER LABEL ---------- */
+  /* ---------- CENTER TEXT ---------- */
   svg.appendChild(el("text", {
     x: cx,
     y: cy - 8,
