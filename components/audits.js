@@ -45,7 +45,7 @@ export async function renderAuditRatioChart(container, userId) {
     }
   `;
 
-  // ✅ if userId missing, show message instead of failing silently
+  // if userId missing, show message instead of failing silently
   if (userId == null) {
     container.innerHTML += `<p class="muted">Audit data unavailable (missing userId).</p>`;
     return;
@@ -56,11 +56,14 @@ export async function renderAuditRatioChart(container, userId) {
   const givenXP = (data.given || []).reduce((s, a) => s + a.amount, 0);
   const receivedXP = (data.received || []).reduce((s, a) => s + a.amount, 0);
 
-  // ✅ platform-style rounding (1 decimal)
+  //  platform-style rounding (1 decimal)
   const rawRatio = receivedXP > 0 ? givenXP / receivedXP : Infinity;
-  const ratio = rawRatio === Infinity ? "∞" : rawRatio.toFixed(1);
+  const ratio =
+    rawRatio === Infinity
+      ? "∞"
+      : (Math.round(rawRatio * 10) / 10).toFixed(1);
 
-  // ✅ compare using rawRatio (number), NOT ratio (string)
+  //  compare using rawRatio (number), NOT ratio (string)
   let feedback = "Balanced";
   if (rawRatio < 1) feedback = "You can do better!";
   if (rawRatio > 1.1) feedback = "Great contribution!";
