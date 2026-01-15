@@ -52,12 +52,12 @@ export async function renderAuditRatioChart(container) {
   const labelX = 30;
   const barX = 200;
   const barWidth = 400;
-  const barHeight = 20;
+  const barHeight = 18;
 
   const doneY = 120;
   const receivedY = 180;
 
-  const ratioY = 260;
+  const ratioY = 240;
   const ratioX = width / 2;
 
   const max = Math.max(givenXP, receivedXP, 1);
