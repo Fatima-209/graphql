@@ -46,6 +46,7 @@ export async function renderPassFailChart(container, userId, mode) {
     if (p.includes("checkpoint")) return false;
     if (p.includes("exam")) return false;
     if (p.includes("rush")) return false;
+    if (p.includes("onboarding")) return false;
 
     // ✅ Must look like a real project path
     // example: /module/ft_printf
