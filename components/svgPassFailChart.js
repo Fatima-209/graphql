@@ -45,8 +45,23 @@ export async function renderPassFailChart(container, userId, mode) {
   });
 
   // PASS / FAIL LOGIC (IMPORTANT)
-  const passed = filtered.filter(r => Number(r.grade) >= 1).length;
-  const failed = filtered.filter(r => Number(r.grade) < 1).length;
+  // Group by project path and keep highest grade
+  const byPath = new Map();
+
+  filtered.forEach(r => {
+    if (!r.path || r.grade == null) return;
+
+    const prev = byPath.get(r.path);
+    if (prev == null || Number(r.grade) > prev) {
+      byPath.set(r.path, Number(r.grade));
+    }
+  });
+
+  // Now count pass/fail per project
+  const grades = [...byPath.values()];
+
+  const passed = grades.filter(g => g >= 1).length;
+  const failed = grades.filter(g => g < 1).length;
 
   const total = passed + failed || 1;
 
