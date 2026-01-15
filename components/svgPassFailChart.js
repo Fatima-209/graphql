@@ -23,14 +23,20 @@ export async function renderPassFailChart(container, userId, mode) {
   `;
 
   /* ---------- FETCH DATA ---------- */
-  const query = `
-    query Progress($userId: Int!) {
-      progress(where: { userId: { _eq: $userId } }) {
-        grade
-        path
+ const query = `
+  query Results($userId: Int!) {
+    result(
+      where: {
+        userId: { _eq: $userId }
+        type: { _eq: "project" }
       }
+    ) {
+      grade
+      path
     }
-  `;
+  }
+`;
+
 
   const data = await graphqlRequest(query, { userId });
   const rows = data?.progress ?? [];
