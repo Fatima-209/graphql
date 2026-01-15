@@ -1,5 +1,6 @@
 import { graphqlRequest } from "../services/graphql.js";
 
+/* ---------- SVG helper ---------- */
 function el(tag, attrs = {}, children = []) {
   const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
   for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v));
@@ -18,18 +19,15 @@ export async function renderPassFailChart(container, userId, mode) {
 
   container.innerHTML = `
     <h3>${mode === "piscine" ? "Piscine Outcomes" : "Project Outcomes"} (Pass / Fail)</h3>
-    <p class="muted">Counts only validated completions (isDone = true).</p>
+    <p class="muted">Final validated result per real project.</p>
   `;
 
-  // ✅ IMPORTANT: include isDone so we only count validated/completed items
+  /* ---------- FETCH DATA ---------- */
   const query = `
     query Progress($userId: Int!) {
-      progress(
-        where: { userId: { _eq: $userId }, isDone: { _eq: true } }
-      ) {
+      progress(where: { userId: { _eq: $userId } }) {
         grade
         path
-        isDone
       }
     }
   `;
@@ -37,41 +35,42 @@ export async function renderPassFailChart(container, userId, mode) {
   const data = await graphqlRequest(query, { userId });
   const rows = data?.progress ?? [];
 
-  // FILTER BY MODE (same rule you had)
-  const filtered = rows.filter(r => {
-    const p = r.path?.toLowerCase() ?? "";
-    if (mode === "piscine") {
-      return p.includes("piscine") || p.includes("checkpoint");
-    }
-    return !p.includes("piscine") && !p.includes("checkpoint");
+  /* ---------- STRICT PROJECT FILTER ---------- */
+  const projectsOnly = rows.filter(r => {
+    if (!r.path) return false;
+
+    const p = r.path.toLowerCase();
+
+    // ❌ Exclusions
+    if (p.includes("piscine")) return false;
+    if (p.includes("checkpoint")) return false;
+    if (p.includes("exam")) return false;
+    if (p.includes("rush")) return false;
+
+    // ✅ Must look like a real project path
+    // example: /module/ft_printf
+    return p.split("/").length >= 3;
   });
 
-  /**
-   * ✅ Correct counting:
-   * - progress can still include multiple entries per project
-   * - group by path and keep the best (highest) grade
-   * - treat null grade as fail (-1)
-   */
-  const bestGradePerPath = new Map();
+  /* ---------- FINAL RESULT PER PROJECT ---------- */
+  const finalResult = new Map();
 
-  for (const r of filtered) {
-    if (!r.path) continue;
-
-    const grade = (r.grade === null || r.grade === undefined) ? -1 : Number(r.grade);
-    const prev = bestGradePerPath.get(r.path);
+  projectsOnly.forEach(r => {
+    const grade = r.grade == null ? -1 : Number(r.grade);
+    const prev = finalResult.get(r.path);
 
     if (prev === undefined || grade > prev) {
-      bestGradePerPath.set(r.path, grade);
+      finalResult.set(r.path, grade);
     }
-  }
+  });
 
-  const finalGrades = [...bestGradePerPath.values()];
+  const grades = [...finalResult.values()];
 
-  const passed = finalGrades.filter(g => g >= 1).length;
-  const failed = finalGrades.filter(g => g < 1).length;
+  const passed = grades.filter(g => g >= 1).length;
+  const failed = grades.filter(g => g < 1).length;
   const total = passed + failed || 1;
 
-  // SVG SETUP
+  /* ---------- SVG SETUP ---------- */
   const width = 520;
   const height = 360;
   const radius = 110;
@@ -79,10 +78,10 @@ export async function renderPassFailChart(container, userId, mode) {
   const cy = height / 2 + 10;
 
   const passAngle = (passed / total) * Math.PI * 2;
-  const largeArc = passAngle > Math.PI ? 1 : 0;
+  const failAngle = Math.PI * 2 - passAngle;
 
-  const x = cx + radius * Math.cos(passAngle - Math.PI / 2);
-  const y = cy + radius * Math.sin(passAngle - Math.PI / 2);
+  const px = cx + radius * Math.cos(passAngle - Math.PI / 2);
+  const py = cy + radius * Math.sin(passAngle - Math.PI / 2);
 
   const svg = el("svg", {
     viewBox: `0 0 ${width} ${height}`,
@@ -90,32 +89,34 @@ export async function renderPassFailChart(container, userId, mode) {
     class: "svg-chart",
   });
 
-  // PASS
+  /* ---------- PASS SLICE ---------- */
   svg.appendChild(el("path", {
     d: `
       M ${cx} ${cy - radius}
-      A ${radius} ${radius} 0 ${largeArc} 1 ${x} ${y}
+      A ${radius} ${radius} 0 ${passAngle > Math.PI ? 1 : 0} 1 ${px} ${py}
       L ${cx} ${cy}
       Z
     `,
-    fill: "rgba(252, 193, 219, 0.9)",
+    fill: "rgba(252,193,219,0.9)",
   }));
 
-  // FAIL
-  svg.appendChild(el("path", {
-    d: `
-      M ${cx} ${cy}
-      L ${x} ${y}
-      A ${radius} ${radius} 0 ${largeArc ? 0 : 1} 1 ${cx} ${cy - radius}
-      Z
-    `,
-    fill: "rgba(255,255,255,0.18)",
-  }));
+  /* ---------- FAIL SLICE ---------- */
+  if (failed > 0) {
+    svg.appendChild(el("path", {
+      d: `
+        M ${cx} ${cy}
+        L ${px} ${py}
+        A ${radius} ${radius} 0 ${passAngle > Math.PI ? 0 : 1} 1 ${cx} ${cy - radius}
+        Z
+      `,
+      fill: "rgba(255,255,255,0.25)",
+    }));
+  }
 
-  // CENTER TEXT
+  /* ---------- CENTER TEXT ---------- */
   svg.appendChild(el("text", {
     x: cx,
-    y: cy - 8,
+    y: cy - 6,
     "text-anchor": "middle",
     fill: "#fff",
     "font-size": "26",
@@ -130,53 +131,14 @@ export async function renderPassFailChart(container, userId, mode) {
     "font-size": "14",
   }, ["Passed"]));
 
-  // LEGEND
-  const legendY = height - 26;
+  /* ---------- LEGEND ---------- */
+  const y = height - 26;
 
-  svg.appendChild(el("rect", {
-    x: cx - 120,
-    y: legendY,
-    width: 14,
-    height: 14,
-    rx: 4,
-    fill: "rgba(252, 193, 219, 0.9)"
-  }));
+  svg.appendChild(el("rect", { x: cx - 120, y, width: 14, height: 14, rx: 4, fill: "rgba(252,193,219,0.9)" }));
+  svg.appendChild(el("text", { x: cx - 96, y: y + 12, fill: "#fff", "font-size": "14" }, [`Pass (${passed})`]));
 
-  svg.appendChild(el("text", {
-    x: cx - 96,
-    y: legendY + 12,
-    fill: "rgba(255,255,255,0.85)",
-    "font-size": "14"
-  }, [`Pass (${passed})`]));
-
-  svg.appendChild(el("rect", {
-    x: cx + 20,
-    y: legendY,
-    width: 14,
-    height: 14,
-    rx: 4,
-    fill: "rgba(255,255,255,0.25)"
-  }));
-
-  svg.appendChild(el("text", {
-    x: cx + 44,
-    y: legendY + 12,
-    fill: "rgba(255,255,255,0.85)",
-    "font-size": "14"
-  }, [`Fail (${failed})`]));
-
-  // animation
-  const paths = svg.querySelectorAll("path");
-  paths.forEach((p, i) => {
-    const len = p.getTotalLength();
-    p.style.strokeDasharray = len;
-    p.style.strokeDashoffset = len;
-
-    p.animate(
-      [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
-      { duration: 900, delay: i * 250, easing: "ease-out", fill: "forwards" }
-    );
-  });
+  svg.appendChild(el("rect", { x: cx + 20, y, width: 14, height: 14, rx: 4, fill: "rgba(255,255,255,0.25)" }));
+  svg.appendChild(el("text", { x: cx + 44, y: y + 12, fill: "#fff", "font-size": "14" }, [`Fail (${failed})`]));
 
   container.appendChild(svg);
 }
