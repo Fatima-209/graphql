@@ -14,6 +14,7 @@ container.innerHTML += `
       <div class="card chart-card" id="chart-project-passfail"></div>
       <div class="card chart-card" id="chart-piscine-grades"></div>
       <div class="card chart-card" id="chart-audit-ratio"></div>
+<div class="card chart-card audit-card" id="chart-audit-ratio"></div>
 
     </div>
   </section>

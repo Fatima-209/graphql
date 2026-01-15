@@ -302,6 +302,26 @@ button {
 }
 
 /* SVG text & effects */
+/* ================= AUDIT RATIO OVERRIDES ================= */
+
+/* Bigger base text inside audit chart */
+.audit-card .svg-chart text {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* Huge audit ratio number */
+.audit-card .svg-chart .ratio-number {
+  font-size: 72px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+/* Feedback text under ratio */
+.audit-card .svg-chart .ratio-feedback {
+  font-size: 22px;
+  font-weight: 600;
+}
 
 .svg-chart text {
   font-family: Inter, system-ui, sans-serif;
