@@ -309,6 +309,10 @@ button {
   font-size: 22px;
   font-weight: 600;
 }
+.audit-card,
+.audit-card svg {
+  overflow: visible;
+}
 
 /* Huge audit ratio number */
 .audit-card .svg-chart .ratio-number {

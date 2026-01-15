@@ -47,7 +47,7 @@ export async function renderAuditRatioChart(container) {
 
   /* ---------- LAYOUT CONSTANTS ---------- */
   const width = 700;
-  const height = 300;
+  const height = 360;
 
   const labelX = 30;
   const barX = 200;
@@ -57,7 +57,7 @@ export async function renderAuditRatioChart(container) {
   const doneY = 120;
   const receivedY = 180;
 
-  const ratioY = 240;
+  const ratioY = 290;
   const ratioX = width / 2;
 
   const max = Math.max(givenXP, receivedXP, 1);
@@ -75,7 +75,6 @@ export async function renderAuditRatioChart(container) {
     x: labelX,
     y: doneY - 6,
     fill: "#ffffff",
-    "font-size": 18,
     "font-weight": 600,
   }, ["Done"]));
 
@@ -116,7 +115,6 @@ export async function renderAuditRatioChart(container) {
     x: labelX,
     y: receivedY - 6,
     fill: "#ffffff",
-    "font-size": 18,
     "font-weight": 600,
   }, ["Received"]));
 
@@ -159,7 +157,6 @@ export async function renderAuditRatioChart(container) {
     x: ratioX,
     y: ratioY,
     fill: "#f7b6d2",
-    "font-size": 96,
     "font-weight": 800,
   }, [ratio]));
 
@@ -169,7 +166,6 @@ export async function renderAuditRatioChart(container) {
     x: ratioX,
     y: ratioY + 28,
     fill: "#f7b6d2",
-    "font-size": 18,
     "font-weight": 600,
   }, [feedback]));
 
