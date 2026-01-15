@@ -58,7 +58,9 @@ export async function renderStatsSection(container, userId) {
     userId
   );
   await renderAuditRatioChart(
-    document.getElementById("chart-audit-ratio")
-  );
+  document.getElementById("chart-audit-ratio"),
+  userId
+);
+
 
 }

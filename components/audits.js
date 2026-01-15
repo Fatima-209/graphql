@@ -18,12 +18,9 @@ function formatXP(amount) {
   return amount.toFixed(0) + " KB";
 }
 
-/**
- * container: DOM element
- * userId: number (REQUIRED)
- */
+// ✅ same function name, just added userId parameter
 export async function renderAuditRatioChart(container, userId) {
-  if (!container || !userId) return;
+  if (!container) return;
 
   container.innerHTML = `
     <h3>Audit Ratio</h3>
@@ -48,19 +45,27 @@ export async function renderAuditRatioChart(container, userId) {
     }
   `;
 
+  // ✅ if userId missing, show message instead of failing silently
+  if (userId == null) {
+    container.innerHTML += `<p class="muted">Audit data unavailable (missing userId).</p>`;
+    return;
+  }
+
   const data = await graphqlRequest(query, { userId });
 
   const givenXP = (data.given || []).reduce((s, a) => s + a.amount, 0);
   const receivedXP = (data.received || []).reduce((s, a) => s + a.amount, 0);
 
+  // ✅ platform-style rounding (1 decimal)
   const rawRatio = receivedXP > 0 ? givenXP / receivedXP : Infinity;
   const ratio = rawRatio === Infinity ? "∞" : rawRatio.toFixed(1);
 
+  // ✅ compare using rawRatio (number), NOT ratio (string)
   let feedback = "Balanced";
   if (rawRatio < 1) feedback = "You can do better!";
   if (rawRatio > 1.1) feedback = "Great contribution!";
 
-  /* ---------- LAYOUT ---------- */
+  /* ---------- LAYOUT CONSTANTS ---------- */
   const width = 760;
   const height = 360;
 
@@ -72,8 +77,8 @@ export async function renderAuditRatioChart(container, userId) {
   const doneY = 120;
   const receivedY = 180;
 
-  const ratioX = width / 2;
   const ratioY = 290;
+  const ratioX = width / 2;
 
   const max = Math.max(givenXP, receivedXP, 1);
   const givenW = (givenXP / max) * barWidth;
@@ -86,7 +91,13 @@ export async function renderAuditRatioChart(container, userId) {
   });
 
   /* ---------- DONE ---------- */
-  svg.appendChild(el("text", { x: labelX, y: doneY - 6, fill: "#fff" }, ["Done"]));
+  svg.appendChild(el("text", {
+    x: labelX,
+    y: doneY - 6,
+    fill: "#ffffff",
+    "font-weight": 600,
+  }, ["Done"]));
+
   svg.appendChild(el("rect", {
     x: barX,
     y: doneY - barHeight / 2,
@@ -99,21 +110,34 @@ export async function renderAuditRatioChart(container, userId) {
   const givenBar = el("rect", {
     x: barX,
     y: doneY - barHeight / 2,
-    width: givenW,
+    width: 0,
     height: barHeight,
     rx: 8,
     fill: "#f7b6d2",
   });
 
   svg.appendChild(givenBar);
+
+  givenBar.animate(
+    [{ width: "0px" }, { width: `${givenW}px` }],
+    { duration: 700, easing: "ease-out", fill: "forwards" }
+  );
+
   svg.appendChild(el("text", {
     x: barX + barWidth + 10,
     y: doneY - 6,
-    fill: "#fff",
+    fill: "#ffffff",
+    "font-size": 16,
   }, [`${formatXP(givenXP)} ↑`]));
 
   /* ---------- RECEIVED ---------- */
-  svg.appendChild(el("text", { x: labelX, y: receivedY - 6, fill: "#fff" }, ["Received"]));
+  svg.appendChild(el("text", {
+    x: labelX,
+    y: receivedY - 6,
+    fill: "#ffffff",
+    "font-weight": 600,
+  }, ["Received"]));
+
   svg.appendChild(el("rect", {
     x: barX,
     y: receivedY - barHeight / 2,
@@ -126,34 +150,43 @@ export async function renderAuditRatioChart(container, userId) {
   const receivedBar = el("rect", {
     x: barX,
     y: receivedY - barHeight / 2,
-    width: receivedW,
+    width: 0,
     height: barHeight,
     rx: 8,
     fill: "#ffffff",
   });
 
   svg.appendChild(receivedBar);
+
+  receivedBar.animate(
+    [{ width: "0px" }, { width: `${receivedW}px` }],
+    { duration: 700, delay: 100, easing: "ease-out", fill: "forwards" }
+  );
+
   svg.appendChild(el("text", {
     x: barX + barWidth + 10,
     y: receivedY - 6,
     fill: "rgba(255,255,255,0.75)",
+    "font-size": 16,
   }, [`${formatXP(receivedXP)} ↓`]));
 
   /* ---------- RATIO ---------- */
   svg.appendChild(el("text", {
+    class: "ratio-number",
+    "text-anchor": "middle",
     x: ratioX,
     y: ratioY,
-    "text-anchor": "middle",
-    class: "ratio-number",
     fill: "#f7b6d2",
+    "font-weight": 800,
   }, [ratio]));
 
   svg.appendChild(el("text", {
+    class: "ratio-feedback",
+    "text-anchor": "middle",
     x: ratioX,
     y: ratioY + 28,
-    "text-anchor": "middle",
-    class: "ratio-feedback",
     fill: "#f7b6d2",
+    "font-weight": 600,
   }, [feedback]));
 
   container.appendChild(svg);
