@@ -5,43 +5,51 @@ function el(tag, attrs = {}, children = []) {
   return n;
 }
 
-function fmtDate(d) {
-  return d.toISOString().slice(0, 10);
+/* Month + Year only (prevents cut-off) */
+function fmtMonthYear(d) {
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function niceNumber(x) {
   return x.toLocaleString();
 }
 
+/* Group XP by day */
 function groupByDay(transactions) {
   const map = new Map();
+
   for (const tx of transactions) {
-    const day = fmtDate(new Date(tx.createdAt));
+    const day = new Date(tx.createdAt).toISOString().slice(0, 10);
     map.set(day, (map.get(day) || 0) + tx.amount);
   }
+
   return [...map.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([day, amount]) => ({ day, amount }));
+    .map(([day, amount]) => ({
+      day,
+      amount,
+    }));
 }
 
 export function renderCumulativeXpLineSvg(container, xpTx) {
   container.innerHTML = `
-  <h3>Skills Progression (Cumulative XP Over Time)</h3>
-  <p class="muted">XP growth over time based on validated project completions.</p>
-  <div class="xp-scroll"></div>
-`;
+    <h3>Skills Progression (Cumulative XP Over Time)</h3>
+    <p class="muted">XP growth over time based on validated project completions.</p>
+    <div class="xp-scroll"></div>
+  `;
 
   const scroll = container.querySelector(".xp-scroll");
-  scroll.appendChild(svg);
 
-
-  const width = 1430;
+  const width = 1400;
   const height = 420;
-  const padding = { top: 40, right: 40, bottom: 60, left: 90 };
+  const padding = { top: 40, right: 40, bottom: 70, left: 90 };
 
   const daily = groupByDay(xpTx);
-  let cumulative = 0;
 
+  let cumulative = 0;
   const points = daily.map(d => {
     cumulative += d.amount;
     return {
@@ -51,7 +59,7 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
   });
 
   if (!points.length) {
-    container.innerHTML += `<p class="muted">No XP data found.</p>`;
+    scroll.innerHTML = `<p class="muted">No XP data found.</p>`;
     return;
   }
 
@@ -72,13 +80,15 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
     padding.top + (1 - y / maxY) * innerH;
 
   const d = points
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${scaleX(p.x)} ${scaleY(p.y)}`)
+    .map((p, i) =>
+      `${i === 0 ? "M" : "L"} ${scaleX(p.x)} ${scaleY(p.y)}`
+    )
     .join(" ");
 
   const svg = el("svg", {
     viewBox: `0 0 ${width} ${height}`,
-    width: "100%",
-    height: height,
+    width,
+    height,
     class: "svg-chart",
   });
 
@@ -105,19 +115,19 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
     }, [document.createTextNode(niceNumber(Math.round(yVal)))]));
   }
 
-  /* X ticks */
-  const tickCount = Math.min(8, points.length - 1);
+  /* X axis ticks (Month + Year) */
+  const tickCount = Math.min(7, points.length - 1);
   for (let i = 0; i <= tickCount; i++) {
     const t = minX + (i / tickCount) * (maxX - minX);
     const x = scaleX(t);
 
     svg.appendChild(el("text", {
       x,
-      y: height - 14,
+      y: height - 22,
       fill: "rgba(255,255,255,0.65)",
       "text-anchor": "middle",
       "font-size": "12",
-    }, [document.createTextNode(fmtDate(new Date(t)))]));
+    }, [document.createTextNode(fmtMonthYear(new Date(t)))]));
   }
 
   /* Axes */
@@ -148,13 +158,16 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
 
   svg.appendChild(path);
 
+  /* Draw animation */
   const len = path.getTotalLength();
   path.style.strokeDasharray = len;
   path.style.strokeDashoffset = len;
+
   path.animate(
     [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
     { duration: 1200, easing: "ease-out", fill: "forwards" }
   );
+
   path.animate(
     [
       { filter: "drop-shadow(0 0 6px rgba(247,182,210,0.4))" },
@@ -165,9 +178,9 @@ export function renderCumulativeXpLineSvg(container, xpTx) {
       duration: 1800,
       iterations: Infinity,
       easing: "ease-in-out",
-      delay: 1200 // starts after line draws
+      delay: 1200
     }
   );
 
-  container.appendChild(svg);
+  scroll.appendChild(svg);
 }
