@@ -24,6 +24,9 @@ export async function renderProjectGradesBar(container, userId) {
         where: {
           userId: { _eq: $userId }
           path: { _nlike: "%piscine%" }
+          path: { _nlike: "%onboarding%" }
+          path: { _nlike: "%exam%" }
+          path: { _ilike: "%/bh-module/%"}
         }
         order_by: { grade: desc }
         limit: 10
