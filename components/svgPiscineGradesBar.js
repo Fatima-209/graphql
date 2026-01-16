@@ -23,7 +23,6 @@ export async function renderProjectGradesBar(container, userId) {
       progress(
         where: {
           userId: { _eq: $userId }
-          path: { _nlike: "%piscine%" }
           path: { _ilike: "%/bh-module/%"}
         }
         order_by: { grade: desc }
