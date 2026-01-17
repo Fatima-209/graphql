@@ -26,34 +26,24 @@ export async function renderAuditRatioChart(container, userId) {
     <h3>Audit Ratio</h3>
     <p class="muted">XP given to peers vs XP received</p>
   `;
-const query = `
-  query Audit($userId: Int!) {
-    given: transaction(
-      where: {
-        userId: { _eq: $userId }
-        type: { _eq: "up" }
-        path: { _ilike: "%/bh-module/%" }
-      }
-    ) {
-      amount
-      path
-      createdAt
-    }
 
-    received: transaction(
-      where: {
-        userId: { _eq: $userId }
-        type: { _eq: "down" }
-        path: { _ilike: "%/bh-module/%" }
-      }
-    ) {
-      amount
-      path
-      createdAt
-    }
-  }
-`;
+  const query = `
+    query Audit($userId: Int!) {
+      given: transaction(
+        where: {
+          userId: { _eq: $userId }
+          type: { _eq: "up" }
+        }
+      ) { amount }
 
+      received: transaction(
+        where: {
+          userId: { _eq: $userId }
+          type: { _eq: "down" }
+        }
+      ) { amount }
+    }
+  `;
 
   // if userId missing, show message instead of failing silently
   if (userId == null) {
@@ -63,26 +53,8 @@ const query = `
 
   const data = await graphqlRequest(query, { userId });
 
-   function latestPerProject(rows) {
-    const map = new Map();
-
-    rows
-      .filter(t => t.amount > 0)
-      .forEach(t => {
-        const prev = map.get(t.path);
-        if (!prev || new Date(t.createdAt) > new Date(prev.createdAt)) {
-          map.set(t.path, t);
-        }
-      });
-
-    return [...map.values()];
-  }
-
-  const finalGiven = latestPerProject(data.given || []);
-  const finalReceived = latestPerProject(data.received || []);
-
-  const givenXP = finalGiven.reduce((s, a) => s + a.amount, 0);
-  const receivedXP = finalReceived.reduce((s, a) => s + a.amount, 0);
+  const givenXP = (data.given || []).reduce((s, a) => s + a.amount, 0);
+  const receivedXP = (data.received || []).reduce((s, a) => s + a.amount, 0);
 
   //  platform-style rounding (1 decimal)
   const rawRatio = receivedXP > 0 ? givenXP / receivedXP : Infinity;
